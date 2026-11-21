@@ -37,18 +37,21 @@ VB_INPUT_LOG (default /var/lib/vbmac/input.log) as the ui_path evidence.
 from __future__ import annotations
 
 import argparse
-import io
-import json
-import os
-import subprocess
-import sys
-import threading
 import time
-import urllib.request
-from pathlib import Path
-from typing import ClassVar
 
-from mcp.server.mcpserver import Image, MCPServer
+T_START = time.time()  # before the heavy imports, so the startup log shows their cost
+
+import io  # noqa: E402
+import json  # noqa: E402
+import os  # noqa: E402
+import subprocess  # noqa: E402
+import sys  # noqa: E402
+import threading  # noqa: E402
+import urllib.request  # noqa: E402
+from pathlib import Path  # noqa: E402
+from typing import ClassVar  # noqa: E402
+
+from mcp.server.mcpserver import Image, MCPServer  # noqa: E402
 
 DISPLAY = ":1"
 CONDITIONS = ("pixels+zoom", "pixels", "pixels-lowres")
@@ -116,8 +119,23 @@ server = MCPServer(
 )
 
 
+# Agent CLIs do not keep an MCP server's stderr, so with the vnc backend the
+# diagnostics also go to a file under /var/lib/vbmac, which harbor collects
+# into the trial's artifacts. A trial whose agent never saw the computer
+# tools then shows whether the server started, and how long it took.
+MCP_LOG = os.environ.get("VB_MCP_LOG", "/var/lib/vbmac/mcp.log" if BACKEND_NAME == "vnc" else "")
+
+
 def log(msg: str) -> None:
-    print(f"vb_computer_mcp: {msg}", file=sys.stderr, flush=True)
+    line = f"vb_computer_mcp: {msg}"
+    print(line, file=sys.stderr, flush=True)
+    if MCP_LOG:
+        try:
+            Path(MCP_LOG).parent.mkdir(parents=True, exist_ok=True)
+            with open(MCP_LOG, "a") as f:
+                f.write(f"{time.time():.3f} pid={os.getpid()} {msg}\n")
+        except OSError:
+            pass
 
 
 def run(argv: list[str], *, timeout: float = 30.0) -> subprocess.CompletedProcess[bytes]:
@@ -326,14 +344,25 @@ class VNCBackend:
             raise RuntimeError("the VM display is not connected")
         return self.client
 
+    def _scale(self) -> float:
+        """Framebuffer pixels per screen point, from the framebuffer's size
+        now: the VM's display can change size after the connection is made
+        (a 1280-wide framebuffer at connect that became 2560 wide put every
+        click at half its coordinates in one trial)."""
+        if self.client is not None and self.client.width:
+            self.k = self.client.width / WIDTH
+        return self.k
+
     def _fb(self, x: int, y: int) -> tuple[int, int]:
-        return round(x * self.k), round(y * self.k)
+        k = self._scale()
+        return round(x * k), round(y * k)
 
     def grab(self, region: tuple[int, int, int, int] | None = None, scale: float = 1) -> bytes:
         import rfb  # noqa: PLC0415
         from PIL import Image as PILImage  # noqa: PLC0415 - only the macOS image has Pillow
 
         w, h, data = self._c().capture()
+        self._scale()
         im = rfb.to_image(w, h, data)
         if region:
             x0, y0, x1, y1 = region
@@ -349,9 +378,30 @@ class VNCBackend:
         im.save(buf, format="WEBP", quality=WEBP_QUALITY)
         return buf.getvalue()
 
-    def click(self, x: int, y: int, button: str, count: int) -> None:
-        self._note("click", x=x, y=y, button=button, count=count)
-        self._c().click(*self._fb(x, y), button=self.BUTTON_NUMBERS.get(button, 1), count=count)
+    MODIFIERS = frozenset({"cmd", "command", "shift", "option", "alt", "ctrl", "control", "fn"})
+
+    def check_modifiers(self, modifiers: str) -> str:
+        names = [m for m in modifiers.replace(" ", "").lower().split("+") if m]
+        bad = [m for m in names if m not in self.MODIFIERS]
+        if bad:
+            raise ValueError(f"unknown modifier {bad[0]!r}: use cmd, shift, option or ctrl")
+        return "+".join(names)
+
+    def click(self, x: int, y: int, button: str, count: int, modifiers: str = "") -> None:
+        mods = self.check_modifiers(modifiers)
+        self._note(
+            "click", x=x, y=y, button=button, count=count, **({"modifiers": mods} if mods else {})
+        )
+        c = self._c()
+        if mods:
+            c.hold(mods, True)
+            time.sleep(0.05)
+        try:
+            c.click(*self._fb(x, y), button=self.BUTTON_NUMBERS.get(button, 1), count=count)
+        finally:
+            if mods:
+                time.sleep(0.05)
+                c.hold(mods, False)
 
     def move(self, x: int, y: int) -> None:
         self._note("move", x=x, y=y)
@@ -384,13 +434,25 @@ class VNCBackend:
             if resp.status != 200:
                 raise RuntimeError(f"scroll failed: {resp.read()[:200]!r}")
 
-    def drag(self, x0: int, y0: int, x1: int, y1: int) -> None:
-        self._note("drag", x0=x0, y0=y0, x1=x1, y1=y1)
+    def drag(self, x0: int, y0: int, x1: int, y1: int, modifiers: str = "") -> None:
+        mods = self.check_modifiers(modifiers)
+        self._note("drag", x0=x0, y0=y0, x1=x1, y1=y1, **({"modifiers": mods} if mods else {}))
         c = self._c()
         fx0, fy0 = self._fb(x0, y0)
         fx1, fy1 = self._fb(x1, y1)
         c.move(fx0, fy0)
         time.sleep(0.1)
+        if mods:
+            c.hold(mods, True)
+            time.sleep(0.05)
+        try:
+            self._drag_from(c, fx0, fy0, fx1, fy1)
+        finally:
+            if mods:
+                time.sleep(0.05)
+                c.hold(mods, False)
+
+    def _drag_from(self, c, fx0: int, fy0: int, fx1: int, fy1: int) -> None:  # type: ignore[no-untyped-def]
         c.button(fx0, fy0, 1, True)
         # macOS picks an item up only after a short hold, and apps track the
         # drag from intermediate moves, so press, hold, move in steps, settle.
@@ -406,7 +468,8 @@ class VNCBackend:
         if self.client is None:
             return None
         px, py = self.client.pointer
-        return round(px / self.k), round(py / self.k)
+        k = self._scale()
+        return round(px / k), round(py / k)
 
 
 BACKEND = VNCBackend() if BACKEND_NAME == "vnc" else X11Backend()
@@ -455,12 +518,32 @@ if ZOOM_ENABLED:
     server.tool()(zoom)
 
 
-@server.tool()
 def click(x: int, y: int, button: str = "left") -> list[Image | str]:
     """Move the mouse to (x, y) and click once. button: left, middle or right."""
     x, y = clamp(x, y)
     BACKEND.click(x, y, button, 1)
     return observe(f"Clicked {button} at {shown(x, y)}.")
+
+
+def click_mac(x: int, y: int, button: str = "left", modifiers: str = "") -> list[Image | str]:
+    """Move the mouse to (x, y) and click once. button: left, middle or right. modifiers: keys held during the click, such as cmd, shift, option, ctrl or cmd+shift (empty for none)."""
+    x, y = clamp(x, y)
+    try:
+        BACKEND.click(x, y, button, 1, modifiers)  # type: ignore[call-arg]
+    except ValueError as exc:
+        return [str(exc)]
+    held = f" holding {modifiers}" if modifiers else ""
+    return observe(f"Clicked {button}{held} at {shown(x, y)}.")
+
+
+# The macOS (VNC) suite's click and drag also take held modifier keys (Finder's
+# Command-click selection, Option-drag copies, menus that change while a key
+# is held); the Linux suite's tool surface stays as it was.
+if BACKEND_NAME == "vnc":
+    click_mac.__name__ = "click"
+    server.tool(name="click")(click_mac)
+else:
+    server.tool()(click)
 
 
 @server.tool()
@@ -526,13 +609,31 @@ def scroll(x: int, y: int, direction: str = "down", amount: int = 3) -> list[Ima
     return observe(f"Scrolled {direction} {amount} at {shown(x, y)}.")
 
 
-@server.tool()
 def drag(x0: int, y0: int, x1: int, y1: int) -> list[Image | str]:
     """Press the left button at (x0, y0), move to (x1, y1) and release."""
     x0, y0 = clamp(x0, y0)
     x1, y1 = clamp(x1, y1)
     BACKEND.drag(x0, y0, x1, y1)
     return observe(f"Dragged {shown(x0, y0)} to {shown(x1, y1)}.")
+
+
+def drag_mac(x0: int, y0: int, x1: int, y1: int, modifiers: str = "") -> list[Image | str]:
+    """Press the left button at (x0, y0), move to (x1, y1) and release. modifiers: keys held during the drag, such as option or cmd (empty for none)."""
+    x0, y0 = clamp(x0, y0)
+    x1, y1 = clamp(x1, y1)
+    try:
+        BACKEND.drag(x0, y0, x1, y1, modifiers)  # type: ignore[call-arg]
+    except ValueError as exc:
+        return [str(exc)]
+    held = f" holding {modifiers}" if modifiers else ""
+    return observe(f"Dragged{held} {shown(x0, y0)} to {shown(x1, y1)}.")
+
+
+if BACKEND_NAME == "vnc":
+    drag_mac.__name__ = "drag"
+    server.tool(name="drag")(drag_mac)
+else:
+    server.tool()(drag)
 
 
 @server.tool()
@@ -568,7 +669,7 @@ def main() -> None:
     args = ap.parse_args()
     log(
         f"backend {BACKEND_NAME}, condition {CONDITION}: screenshots {IMG_W}x{IMG_H}, "
-        f"zoom {'on' if ZOOM_ENABLED else 'off'}"
+        f"zoom {'on' if ZOOM_ENABLED else 'off'}; imports took {time.time() - T_START:.2f} s"
     )
     if BACKEND_NAME == "vnc":
         # Answer MCP at once and reach the VM in the background: an agent CLI
@@ -577,7 +678,11 @@ def main() -> None:
         threading.Thread(target=BACKEND.start, args=(args.start_url,), daemon=True).start()
     else:
         BACKEND.start(args.start_url)
-    server.run(transport="stdio")
+    log("serving MCP on stdio")
+    try:
+        server.run(transport="stdio")
+    finally:
+        log("MCP stdio closed")
 
 
 if __name__ == "__main__":

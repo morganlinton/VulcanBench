@@ -122,6 +122,9 @@ def main() -> int:  # noqa: PLR0915 - one linear build script
     extra = (f"--dir=seed:{seed_dir}:ro",) if seed_dir.is_dir() else ()
     vm.start(display=spec.get("display", "1280x800"), extra=extra)
     try:
+        # Session first, through the guest agent: a VNC client connecting early
+        # in boot has crashed the VM (an assertion in _VZVNCServer).
+        print(f"session after {vm.wait_session(settle=10.0):.0f} s", flush=True)
         print(f"desktop after {vm.wait_desktop():.0f} s", flush=True)
         vm.close_client()
         if not vm.agent_ready(180):
@@ -148,6 +151,7 @@ def main() -> int:  # noqa: PLR0915 - one linear build script
     # Check boot: frozen clock, no network, start screen.
     vm.start(display=spec.get("display", "1280x800"))
     try:
+        vm.wait_session(settle=10.0)
         vm.wait_desktop()
         vm.screenshot(out / "start.png")
         vm.close_client()

@@ -1,0 +1,1 @@
+Organize my Kitchen renovation reminders: move the three "Order" reminders into a new list called "Ordering", make "Choose a contractor" due Friday 13 March and "Book electrician for new outlets" due Tuesday 17 March, give "Get three contractor quotes" high priority, and mark "Pick paint color" done, we chose it. Don't change anything else.

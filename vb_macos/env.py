@@ -111,7 +111,10 @@ class TartEnvironment(DockerEnvironment):
         self.vm_spec: dict[str, Any] | None = (
             json.loads(spec_path.read_text()) if spec_path.is_file() else None
         )
-        self.vm_name = f"vbmac-trial-{uuid.uuid4().hex[:10]}"
+        # vbmac-trial-<task>-<id>: the gate deletes leftover stopped trial VMs of
+        # its own task only, so a validation running beside a sweep keeps its VM.
+        slug = str((self.vm_spec or {}).get("image", "vbmac-task-x")).removeprefix("vbmac-task-")
+        self.vm_name = f"vbmac-trial-{slug}-{uuid.uuid4().hex[:10]}"
         self.vm_logs = Path(self.trial_paths.trial_dir) / "vm"
         self.vm: V.VM | None = None
         self.scroll: ScrollProxy | None = None
@@ -164,11 +167,27 @@ class TartEnvironment(DockerEnvironment):
             self._event("vm-died")
             raise RuntimeError("the trial's VM exited before collection")
         t0 = time.time()
-        how = self.vm.shutdown(timeout=float(self.vm_spec.get("shutdown_timeout_sec", 180)))
         out = Path(tempfile.mkdtemp(prefix="vbmac-collect-"))
+        # Probes: read-only guest commands a task names in vm.json ("probes":
+        # {name: command}), run as the logged-in user before shutdown, for
+        # state that is not in a file the host can read (a root-owned
+        # directory record, for one). Output goes to export/probes/<name>.txt.
+        probes: dict[str, Any] = {}
+        for pname, cmd in (self.vm_spec.get("probes") or {}).items():
+            pdir = out / "probes"
+            pdir.mkdir(exist_ok=True)
+            try:
+                r = self.vm.exec(str(cmd), timeout=60, check=False)
+                (pdir / f"{pname}.txt").write_text(r.stdout)
+                probes[pname] = r.returncode
+            except Exception as exc:
+                probes[pname] = repr(exc)[:200]
+        how = self.vm.shutdown(timeout=float(self.vm_spec.get("shutdown_timeout_sec", 180)))
         fs = out / "fs"
         fs.mkdir()
         manifest: dict[str, Any] = {"shutdown": how, "paths": {}}
+        if probes:
+            manifest["probes"] = probes
         mnt = Path(tempfile.mkdtemp(prefix="vbmac-mnt-"))
         with V.mounted_data(self.vm.disk_path(), mnt, readonly=True) as root:
             for p in paths:

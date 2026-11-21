@@ -1,0 +1,1 @@
+Go through the invoices in my Downloads, in the Invoices folder, and add a reminder for each one I still have to pay to a new list called "Bills": title it "Pay" and the vendor's name, make it due the day the invoice is due, and put the amount in the notes.

@@ -1,0 +1,8 @@
+{
+  "note": "Near-misses of the goal, run as the oracle solution by scripts/computer-use/validate_task.py. Each must score reward 0 with the named sub-metric catching it.",
+  "cheats": [
+    {"name": "work-and-mobile-swapped", "solution": "gold", "env": {"VB_SWAP": "1"}, "expect": {"reward": 0, "phones_labeled": 0}},
+    {"name": "address-left-out", "solution": "gold", "env": {"VB_NO_ADDR": "1"}, "expect": {"reward": 0, "addresses": 0}},
+    {"name": "job-title-left-out", "solution": "gold", "env": {"VB_NO_TITLE": "1"}, "expect": {"reward": 0, "names_titles": 0}}
+  ]
+}

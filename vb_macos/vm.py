@@ -34,10 +34,14 @@ TART = os.environ.get("TART") or shutil.which("tart") or "/opt/homebrew/bin/tart
 VNC_RE = re.compile(r"vnc://[^\s]+")
 # Apps the base image grants the guest agent Automation of (build_base.py).
 SCRIPTABLE = ("Notes", "Reminders", "Calendar", "Contacts", "Preview", "TextEdit")
+# Each app is quit only when a process by that name is running, checked from
+# the shell: a `tell application` in the script itself can launch an app that
+# is not running (seen 2026-11-15: TextEdit, never opened by the agent, came
+# up at shutdown and hung there with "failed to quit and is not responding").
 QUIT_APPS = (
     "; ".join(
-        f"osascript -e 'with timeout of 15 seconds' -e 'if application \"{a}\" is running then "
-        f"tell application \"{a}\" to quit' -e 'end timeout' >/dev/null 2>&1"
+        f"if pgrep -xq '{a}'; then osascript -e 'with timeout of 15 seconds' "
+        f"-e 'tell application \"{a}\" to quit' -e 'end timeout' >/dev/null 2>&1; fi"
         for a in SCRIPTABLE
     )
     + "; sleep 2; true"
@@ -188,6 +192,11 @@ class VM:
     def alive(self) -> bool:
         return self.proc is None or self.proc.poll() is None
 
+    def _try_exec(self, cmd: str, timeout: float) -> None:
+        """exec for shutdown steps: a timeout or failure is not fatal."""
+        with contextlib.suppress(subprocess.TimeoutExpired):
+            self.exec(cmd, timeout=timeout, check=False)
+
     def exec(
         self, cmd: str, timeout: float = 120, check: bool = True
     ) -> subprocess.CompletedProcess[str]:
@@ -229,18 +238,17 @@ class VM:
         if self.agent_ready(timeout=20):
             # First quit the apps the base image lets the guest agent script,
             # one at a time with a timeout, so each saves before shutdown.
-            self.exec(QUIT_APPS, timeout=90, check=False)
-            self.exec(
-                "osascript -e 'tell application \"System Events\" to shut down'",
-                timeout=60,
-                check=False,
+            # Best effort: an app stuck behind a sheet has made the guest agent
+            # hang past the timeout; the shutdown request still has to go out.
+            self._try_exec(QUIT_APPS, timeout=90)
+            self._try_exec(
+                "osascript -e 'tell application \"System Events\" to shut down'", timeout=60
             )
             requested = "system-events"
             if not self._wait_stopped(30):
-                self.exec(
+                self._try_exec(
                     "osascript -e 'tell application \"loginwindow\" to «event aevtrsdn»'",
                     timeout=30,
-                    check=False,
                 )
                 requested = "loginwindow"  # its dialog proceeds after 60 s
         if requested and self._wait_stopped(timeout):

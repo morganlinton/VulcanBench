@@ -1,0 +1,8 @@
+{
+  "note": "Near-misses of the goal, run as the oracle solution by scripts/computer-use/validate_task.py. Each must score reward 0 with the named sub-metric catching it.",
+  "cheats": [
+    {"name": "heading-24-point", "solution": "gold", "env": {"VB_BIG": "1"}, "expect": {"reward": 0, "heading": 0}},
+    {"name": "dash-lines-not-a-list", "solution": "gold", "env": {"VB_DASH": "1"}, "expect": {"reward": 0, "bulleted": 0}},
+    {"name": "attendees-bolded-too", "solution": "gold", "env": {"VB_ALLBOLD": "1"}, "expect": {"reward": 0, "rest_plain": 0}}
+  ]
+}

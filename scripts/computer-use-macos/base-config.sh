@@ -68,4 +68,11 @@ if ! dscl . -authonly admin "$NEWPW" >/dev/null 2>&1; then
 fi
 sudo -n sysadminctl -autologin set -userName admin -password "$NEWPW" >/dev/null 2>&1
 rm -f "$HOME/Library/Keychains/login.keychain-db"
+# The data-protection keychain (a per-host UUID folder) was sealed with the old
+# password too. Left behind, ScopedBookmarkAgent spins in _migrateAgentKey from
+# every boot, and anything that needs a security-scoped bookmark (opening a
+# document, NSPersistentUI, Recent Documents) blocks on it: TextEdit hangs.
+for d in "$HOME/Library/Keychains/"*-*-*-*-*; do
+  [ -d "$d" ] && rm -rf "$d"
+done
 echo base-config-ok

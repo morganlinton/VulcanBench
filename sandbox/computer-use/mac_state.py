@@ -44,6 +44,20 @@ APPLE_EPOCH = 978307200  # 2001-01-01 in Unix time
 GUEST_TZ = ZoneInfo("America/New_York")  # base-config.sh
 
 
+def _from_ts(t: float | None, tz) -> datetime | None:
+    """datetime for a Unix time, or None when absent or out of range.
+
+    A store can hold an absurd date (an agent typed year 22026, say); a
+    checker must score that as wrong, not crash on it.
+    """
+    if t is None:
+        return None
+    try:
+        return datetime.fromtimestamp(t, tz)
+    except (OverflowError, OSError, ValueError):
+        return None
+
+
 # -- protobuf (just enough for Notes) ---------------------------------------
 def _varint(buf: bytes, i: int) -> tuple[int, int]:
     shift = val = 0
@@ -172,15 +186,18 @@ class Reminder:
     all_day: bool
     completed: bool
     deleted: bool
+    pk: int = 0
+    parent: int | None = None  # Z_PK of the reminder this is a subtask of
+    flagged: bool = False
+    priority: int = 0  # 0 none, 1 high, 5 medium, 9 low
 
     @property
     def due_date(self) -> date | None:
         """The calendar day it is due, as the guest shows it."""
         if self.due is None:
             return None
-        if self.all_day:  # stored as midnight UTC of that day
-            return datetime.fromtimestamp(self.due, UTC).date()
-        return datetime.fromtimestamp(self.due, GUEST_TZ).date()
+        d = _from_ts(self.due, UTC if self.all_day else GUEST_TZ)  # all-day: midnight UTC
+        return d.date() if d else None
 
 
 def reminders(root: Path) -> list[Reminder]:
@@ -190,16 +207,34 @@ def reminders(root: Path) -> list[Reminder]:
     for db in stores:
         con = sqlite3.connect(f"file:{db}?mode=ro", uri=True)
         try:
+            cols = _cols(con, "ZREMCDREMINDER")
+            opt = ", ".join(
+                f"r.{c}" if c in cols else "NULL"
+                for c in ("ZPARENTREMINDER", "ZFLAGGED", "ZPRIORITY")
+            )
             rows = con.execute(
-                """SELECT r.ZTITLE, r.ZNOTES, l.ZNAME, r.ZDUEDATE, r.ZALLDAY, r.ZCOMPLETED,
-                          r.ZMARKEDFORDELETION, l.ZMARKEDFORDELETION
+                f"""SELECT r.ZTITLE, r.ZNOTES, l.ZNAME, r.ZDUEDATE, r.ZALLDAY, r.ZCOMPLETED,
+                          r.ZMARKEDFORDELETION, l.ZMARKEDFORDELETION, r.Z_PK, {opt}
                    FROM ZREMCDREMINDER r LEFT JOIN ZREMCDBASELIST l ON l.Z_PK = r.ZLIST"""
             ).fetchall()
         except sqlite3.DatabaseError:
             rows = []
         finally:
             con.close()
-        for title, notes_, lname, due, allday, done, gone, list_gone in rows:
+        for (
+            title,
+            notes_,
+            lname,
+            due,
+            allday,
+            done,
+            gone,
+            list_gone,
+            pk,
+            parent,
+            flag,
+            prio,
+        ) in rows:
             out.append(
                 Reminder(
                     title=title or "",
@@ -209,6 +244,10 @@ def reminders(root: Path) -> list[Reminder]:
                     all_day=bool(allday),
                     completed=bool(done),
                     deleted=bool(gone) or bool(list_gone),
+                    pk=pk,
+                    parent=parent,
+                    flagged=bool(flag),
+                    priority=int(prio or 0),
                 )
             )
     return out
@@ -249,7 +288,7 @@ class Event:
     exceptions: list[float]
 
     def local(self, t: float | None) -> datetime | None:
-        return datetime.fromtimestamp(t, GUEST_TZ) if t is not None else None
+        return _from_ts(t, GUEST_TZ)
 
     @property
     def start_local(self) -> datetime | None:
@@ -298,6 +337,382 @@ def events(root: Path) -> list[Event]:
         )
         for rid, summ, cal, sd, ed, ad, hr, oi, od in rows
     ]
+
+
+# -- Contacts ---------------------------------------------------------------
+CONTACTS_DB = f"{HOME}/Library/Application Support/AddressBook/AddressBook-v22.abcddb"
+_ENT_CONTACT, _ENT_GROUP = "ABCDContact", "ABCDGroup"
+
+
+def _label(raw: str | None) -> str:
+    """'_$!<Mobile>!$_' (a built-in label) or 'mobile' -> 'mobile'."""
+    s = (raw or "").strip()
+    if s.startswith("_$!<") and s.endswith(">!$_"):
+        s = s[4:-4]
+    return s.lower()
+
+
+def phone_key(number: str) -> str:
+    """A phone number compared by its last ten digits."""
+    digits = "".join(ch for ch in number if ch.isdigit())
+    return digits[-10:]
+
+
+@dataclass
+class Contact:
+    pk: int
+    first: str
+    last: str
+    org: str
+    title: str
+    nickname: str
+    phones: list[tuple[str, str]]  # (label, number)
+    emails: list[tuple[str, str]]  # (label, address)
+    addresses: list[dict]  # type: ignore[type-arg]
+    note: str
+    groups: list[str]
+
+    @property
+    def name(self) -> str:
+        return " ".join(p for p in (self.first, self.last) if p).strip()
+
+    @property
+    def phone_keys(self) -> set[str]:
+        return {phone_key(n) for _, n in self.phones if phone_key(n)}
+
+    @property
+    def email_keys(self) -> set[str]:
+        return {a.strip().lower() for _, a in self.emails if a.strip()}
+
+
+def _ents(con: sqlite3.Connection) -> dict[str, int]:
+    return {name: ent for ent, name in con.execute("SELECT Z_ENT, Z_NAME FROM Z_PRIMARYKEY")}
+
+
+def contacts(root: Path) -> list[Contact]:
+    """Every person card in the local Contacts store ("On My Mac")."""
+    db = Path(root) / CONTACTS_DB
+    con = sqlite3.connect(f"file:{db}?mode=ro", uri=True)
+    try:
+        ents = _ents(con)
+        pe, ge = ents.get(_ENT_CONTACT, 22), ents.get(_ENT_GROUP, 19)
+        nick = "ZNICKNAME" if "ZNICKNAME" in _cols(con, "ZABCDRECORD") else "NULL"
+        people = con.execute(
+            f"""SELECT Z_PK, ZFIRSTNAME, ZLASTNAME, ZORGANIZATION, ZJOBTITLE, {nick}
+                FROM ZABCDRECORD WHERE Z_ENT = ?""",
+            (pe,),
+        ).fetchall()
+        groups = dict(con.execute("SELECT Z_PK, ZNAME FROM ZABCDRECORD WHERE Z_ENT = ?", (ge,)))
+        membership: dict[int, list[str]] = {}
+        table = f"Z_{pe}PARENTGROUPS"
+        mcols = _cols(con, table)
+        if mcols:
+            ccol = next(c for c in mcols if c.endswith("CONTACTS"))
+            gcol = next(c for c in mcols if "PARENTGROUPS" in c)
+            for cpk, gpk in con.execute(f"SELECT {ccol}, {gcol} FROM {table}"):
+                if gpk in groups:
+                    membership.setdefault(cpk, []).append(groups[gpk])
+        phones: dict[int, list[tuple[str, str]]] = {}
+        for owner, label, num in con.execute(
+            "SELECT ZOWNER, ZLABEL, ZFULLNUMBER FROM ZABCDPHONENUMBER ORDER BY ZOWNER, Z_PK"
+        ):
+            phones.setdefault(owner, []).append((_label(label), num or ""))
+        emails: dict[int, list[tuple[str, str]]] = {}
+        for owner, label, addr in con.execute(
+            "SELECT ZOWNER, ZLABEL, ZADDRESS FROM ZABCDEMAILADDRESS ORDER BY ZOWNER, Z_PK"
+        ):
+            emails.setdefault(owner, []).append((_label(label), addr or ""))
+        addrs: dict[int, list[dict]] = {}  # type: ignore[type-arg]
+        for owner, label, street, city, state, zipc in con.execute(
+            "SELECT ZOWNER, ZLABEL, ZSTREET, ZCITY, ZSTATE, ZZIPCODE FROM ZABCDPOSTALADDRESS"
+        ):
+            addrs.setdefault(owner, []).append(
+                {
+                    "label": _label(label),
+                    "street": street or "",
+                    "city": city or "",
+                    "state": state or "",
+                    "zip": zipc or "",
+                }
+            )
+        notes_ = {
+            owner: text or ""
+            for owner, text in con.execute("SELECT ZCONTACT, ZTEXT FROM ZABCDNOTE")
+            if owner is not None
+        }
+    finally:
+        con.close()
+    return [
+        Contact(
+            pk=pk,
+            first=(first or "").strip(),
+            last=(last or "").strip(),
+            org=(org or "").strip(),
+            title=(title or "").strip(),
+            nickname=(nk or "").strip(),
+            phones=phones.get(pk, []),
+            emails=emails.get(pk, []),
+            addresses=addrs.get(pk, []),
+            note=notes_.get(pk, ""),
+            groups=sorted(membership.get(pk, [])),
+        )
+        for pk, first, last, org, title, nk in people
+    ]
+
+
+# Smart Lists (ABCDSmartGroup): a name plus an archived ABSearchElement rule.
+# Only simple rules on a card's text fields are evaluated; anything else
+# (compound rules, dates, unknown properties) matches nobody, so a checker
+# that accepts smart groups fails safe.
+_SEARCH_FIELDS = {"Organization": "org", "JobTitle": "title", "First": "first", "Last": "last"}
+
+
+def _search_match(comparison: int, have: str, want: str) -> bool | None:
+    h, w = have.casefold(), want.casefold()
+    table = {  # ABSearchComparison values (ABTypedefs.h)
+        0: have == want,
+        6: h == w,
+        7: want in have,
+        8: w in h,
+        9: have.startswith(want),
+        10: h.startswith(w),
+        15: have.endswith(want),
+        16: h.endswith(w),
+    }
+    return table.get(comparison)
+
+
+@dataclass
+class SmartGroup:
+    name: str
+    field: str | None  # Contact attribute the rule tests, None if unsupported
+    comparison: int
+    value: str
+
+    def matches(self, c: Contact) -> bool:
+        if self.field is None:
+            return False
+        return bool(_search_match(self.comparison, getattr(c, self.field), self.value))
+
+
+def _unarchive(blob: bytes) -> dict | None:  # type: ignore[type-arg]
+    """The root object of an NSKeyedArchiver plist, one level resolved."""
+    try:
+        p = plistlib.loads(blob)
+        objs = p["$objects"]
+        root = objs[p["$top"]["root"].data]
+    except (
+        plistlib.InvalidFileException,
+        KeyError,
+        IndexError,
+        TypeError,
+        ValueError,
+        AttributeError,
+    ):
+        return None
+    if not isinstance(root, dict):
+        return None
+    return {k: (objs[v.data] if isinstance(v, plistlib.UID) else v) for k, v in root.items()}
+
+
+def smart_groups(root: Path) -> dict[str, SmartGroup]:
+    db = Path(root) / CONTACTS_DB
+    con = sqlite3.connect(f"file:{db}?mode=ro", uri=True)
+    try:
+        se = _ents(con).get("ABCDSmartGroup")
+        if se is None or "ZSEARCHELEMENTDATA" not in _cols(con, "ZABCDRECORD"):
+            return {}
+        rows = con.execute(
+            "SELECT ZNAME, ZSEARCHELEMENTDATA FROM ZABCDRECORD WHERE Z_ENT = ?", (se,)
+        ).fetchall()
+    finally:
+        con.close()
+    out: dict[str, SmartGroup] = {}
+    for name, blob in rows:
+        el = _unarchive(blob) if blob else None
+        prop = el.get("ABSearchProperty") if el else None
+        value = el.get("ABSearchValue") if el else None
+        comp = el.get("ABSearchComparison") if el else None
+        simple = isinstance(prop, str) and isinstance(value, str) and isinstance(comp, int)
+        out[name or ""] = SmartGroup(
+            name=name or "",
+            field=_SEARCH_FIELDS.get(prop) if simple else None,  # type: ignore[arg-type]
+            comparison=comp if simple else -1,  # type: ignore[arg-type]
+            value=value if simple else "",  # type: ignore[arg-type]
+        )
+    return out
+
+
+def contact_groups(root: Path) -> list[str]:
+    db = Path(root) / CONTACTS_DB
+    con = sqlite3.connect(f"file:{db}?mode=ro", uri=True)
+    try:
+        ge = _ents(con).get(_ENT_GROUP, 19)
+        return [r[0] for r in con.execute("SELECT ZNAME FROM ZABCDRECORD WHERE Z_ENT = ?", (ge,))]
+    finally:
+        con.close()
+
+
+# -- preferences --------------------------------------------------------------
+GLOBAL_PREFS = f"{HOME}/Library/Preferences/.GlobalPreferences.plist"
+SAVED_SEARCHES = f"{HOME}/Library/Saved Searches"
+TEXT_REPLACEMENTS_DB = f"{HOME}/Library/KeyboardServices/TextReplacements.db"
+
+
+def text_replacements(root: Path) -> dict[str, str]:
+    """Settings > Keyboard > Text Replacements: {shortcut: phrase}, from the
+    store the keyboard services read (KeyboardServices/TextReplacements.db).
+    The copy System Settings mirrors into the global domain
+    (NSUserDictionaryReplacementItems) is not what makes a replacement work,
+    so it is not read."""
+    db = Path(root) / TEXT_REPLACEMENTS_DB
+    if not db.is_file():
+        return {}
+    con = sqlite3.connect(f"file:{db}?mode=ro", uri=True)
+    try:
+        rows = con.execute(
+            "SELECT ZSHORTCUT, ZPHRASE FROM ZTEXTREPLACEMENTENTRY "
+            "WHERE ZWASDELETED IS NULL OR ZWASDELETED = 0 ORDER BY ZTIMESTAMP"
+        ).fetchall()
+    except sqlite3.DatabaseError:
+        rows = []
+    finally:
+        con.close()
+    return {str(k or ""): str(v or "") for k, v in rows}
+
+
+def app_shortcuts(root: Path, domain: str) -> dict[str, str]:
+    """App Shortcuts for one app (its NSUserKeyEquivalents): {menu title:
+    key equivalent}, where '@' is Command, '^' Control, '~' Option, '$' Shift."""
+    name = ".GlobalPreferences" if domain == "NSGlobalDomain" else domain
+    p = Path(root) / HOME / "Library" / "Preferences" / f"{name}.plist"
+    return dict(read_plist(p).get("NSUserKeyEquivalents", {})) if p.is_file() else {}
+
+
+def saved_searches(root: Path) -> dict[str, dict]:  # type: ignore[type-arg]
+    """Finder smart folders saved in ~/Library/Saved Searches: {name: plist}."""
+    d = Path(root) / SAVED_SEARCHES
+    if not d.is_dir():
+        return {}
+    return {p.stem: read_plist(p) for p in sorted(d.glob("*.savedSearch"))}
+
+
+# -- RTF (TextEdit) -----------------------------------------------------------
+@dataclass
+class Para:
+    text: str
+    bold: bool  # every visible character is bold
+    sizes: set[float]  # point sizes of the visible characters
+    in_list: bool  # a list item (\lsN, as TextEdit's lists write)
+
+
+_RTF_TOKEN = None
+_SKIP_DESTS = {
+    "fonttbl", "colortbl", "expandedcolortbl", "stylesheet", "info", "listtable",
+    "listoverridetable", "pict", "header", "footer", "themedata", "colorschememapping",
+}  # fmt: skip
+
+
+def rtf_paragraphs(path: Path) -> list[Para]:  # noqa: PLR0912, PLR0915 - one tokenizer loop
+    """The paragraphs of an RTF file as TextEdit writes it, with per-paragraph
+    bold, point sizes and list membership. Enough of RTF for that: groups,
+    \\b, \\fs, \\pard, \\lsN, \\par (or a backslash before a newline),
+    \\'hh and \\uN escapes; destinations (font and color tables, list
+    tables, \\* groups) and list markers ({\\listtext ...}) are skipped."""
+    import re  # noqa: PLC0415
+
+    global _RTF_TOKEN  # noqa: PLW0603
+    if _RTF_TOKEN is None:
+        _RTF_TOKEN = re.compile(
+            r"\\([a-zA-Z]+)(-?\d+)? ?|\\'([0-9a-fA-F]{2})|\\([^a-zA-Z])|([{}])|([^\\{}\r\n]+)|[\r\n]"
+        )
+    data = Path(path).read_bytes().decode("latin-1")
+    paras: list[Para] = []
+    chars: list[tuple[str, bool, float]] = []
+    in_list = False
+    stack: list[dict] = []  # type: ignore[type-arg]
+    st = {"b": False, "fs": 24, "skip": False, "uc": 1}
+    pending_skip = 0
+    first_in_group = False
+
+    def end_para() -> None:
+        nonlocal chars, in_list
+        text = "".join(c for c, _, _ in chars)
+        vis = [(c, b, s) for c, b, s in chars if not c.isspace()]
+        paras.append(
+            Para(
+                text=text.strip(),
+                bold=bool(vis) and all(b for _, b, _ in vis),
+                sizes={s for _, _, s in vis},
+                in_list=in_list,
+            )
+        )
+        chars = []
+
+    def emit(s: str) -> None:
+        nonlocal pending_skip
+        if st["skip"]:
+            return
+        for ch in s:
+            if pending_skip:
+                pending_skip -= 1
+                continue
+            chars.append((ch, st["b"], st["fs"] / 2))
+
+    for mt in _RTF_TOKEN.finditer(data):
+        word, num, hexd, sym, brace, text = mt.groups()
+        if brace == "{":
+            stack.append(dict(st))
+            first_in_group = True
+            continue
+        if brace == "}":
+            if stack:
+                st = stack.pop()
+            first_in_group = False
+            continue
+        was_first, first_in_group = first_in_group, False
+        if word is not None:
+            if was_first and (word in _SKIP_DESTS or word == "listtext"):
+                st["skip"] = True
+                if word == "listtext":
+                    in_list = True
+                continue
+            if word == "b":
+                st["b"] = num != "0"
+            elif word == "fs" and num:
+                st["fs"] = int(num)
+            elif word == "pard":
+                in_list = False
+            elif word == "ls":
+                in_list = True
+            elif word == "par" and not st["skip"]:
+                end_para()
+            elif word == "uc" and num:
+                st["uc"] = int(num)
+            elif word == "u" and num:
+                emit(chr(int(num) % 65536))
+                pending_skip = st["uc"]
+            elif word == "tab":
+                emit("\t")
+            continue
+        if sym is not None:
+            if sym == "*" and was_first:
+                st["skip"] = True
+            elif sym in "\n\r" and not st["skip"]:
+                end_para()
+            elif sym in "\\{}":
+                emit(sym)
+            elif sym == "~":
+                emit(" ")
+            continue
+        if hexd is not None:
+            emit(bytes([int(hexd, 16)]).decode("cp1252", errors="replace"))
+            continue
+        if text:
+            emit(text)
+    if chars:
+        end_para()
+    return [p for p in paras if p.text or p.in_list]
 
 
 # -- generic ----------------------------------------------------------------

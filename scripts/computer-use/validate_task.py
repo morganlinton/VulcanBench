@@ -74,6 +74,7 @@ class Trial:
     exception: object
     seconds: float | None
     screenshot_sha: str | None
+    oracle_rc: int | None = None
 
 
 @dataclass
@@ -230,7 +231,12 @@ def run_harbor(task: Path, agent: str, attempts: int, jobs: Path, label: str) ->
                 pass
         shot = trial_dir / "agent" / "gold-final.png"
         sha = hashlib.sha256(shot.read_bytes()).hexdigest()[:12] if shot.is_file() else None
-        result.trials.append(Trial(trial_dir.name, reward, exception, seconds, sha))
+        rc_file = trial_dir / "agent" / "exit-code.txt"
+        try:
+            oracle_rc = int(rc_file.read_text().strip()) if rc_file.is_file() else None
+        except ValueError:
+            oracle_rc = None
+        result.trials.append(Trial(trial_dir.name, reward, exception, seconds, sha, oracle_rc))
     return result
 
 
@@ -282,6 +288,7 @@ class Session:
         self.runs: dict[str, object] = {}
         self.failed = False
         self.infra = False
+        self.cheat_names: set[str] = set()
 
     def record(self, label: str, result: RunResult, ok: bool) -> None:
         self.runs[label] = {
@@ -336,10 +343,14 @@ class Session:
     def check_cheats(self) -> None:
         cheats = json.loads((self.task / "tests/cheats.json").read_text())["cheats"]
         for cheat in cheats:
+            if self.cheat_names and cheat["name"] not in self.cheat_names:
+                continue
             label = f"cheat-{cheat['name']}"
             copy = install_cheat(self.task, cheat, self.work)
             r = run_harbor(copy, "oracle", 1, self.jobs, label)
-            if r.infra:
+            # A cheat whose oracle crashed (a VNC fault, say) collects nothing
+            # and scores 0 everywhere: that is not the cheat being caught.
+            if r.infra or any(t.oracle_rc not in (None, 0) for t in r.trials):
                 self.report_infra(label, r)
                 continue
             t = r.trials[0]
@@ -391,6 +402,7 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--gold-runs", type=int, default=3)
     ap.add_argument("--only", default="nop,gold,cheats", help="comma list of nop,gold,cheats")
     ap.add_argument("--keep", action="store_true", help="keep the cheat task copies on PASS")
+    ap.add_argument("--cheat", action="append", default=[], help="run only this cheat (repeatable)")
     args = ap.parse_args(argv)
 
     task = args.task.resolve()
@@ -414,6 +426,7 @@ def main(argv: list[str] | None = None) -> int:
         args.jobs or Path.home() / "vulcanbench-gate" / "validate" / f"{task.name}-{stamp}"
     ).resolve()
     session = Session(task, work, args.gold_runs)
+    session.cheat_names = set(args.cheat)
     only = {s.strip() for s in args.only.split(",")}
     if "nop" in only:
         session.check_nop()

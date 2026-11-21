@@ -1,0 +1,8 @@
+{
+  "note": "Near-misses of the goal, run as the oracle solution by scripts/computer-use/validate_task.py. Each must score reward 0 with the named sub-metric catching it.",
+  "cheats": [
+    {"name": "european-date-misread", "solution": "gold", "env": {"VB_EU": "us"}, "expect": {"reward": 0, "european_date": 0}},
+    {"name": "paid-invoice-added", "solution": "gold", "env": {"VB_PAID": "1"}, "expect": {"reward": 0, "skipped_settled": 0}},
+    {"name": "net-15-from-today", "solution": "gold", "env": {"VB_NET": "from-today"}, "expect": {"reward": 0, "terms_dates": 0}}
+  ]
+}

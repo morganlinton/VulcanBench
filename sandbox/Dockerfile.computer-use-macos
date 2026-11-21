@@ -7,7 +7,8 @@
 # VM's own VNC server at host.docker.internal. The harbor environment
 # vb_macos.env:TartEnvironment writes the vnc:// URL to /var/lib/vbmac/vnc.url
 # after the VM boots. Pillow encodes screenshots (WebP); cryptography does the
-# DES step of VNC authentication.
+# DES step of VNC authentication; pypdf lets checkers read the pages of PDFs
+# an agent saved (Preview rewrites the files it saves).
 #
 # Build context is sandbox/computer-use:
 #   make sandbox-image-computer-use-macos
@@ -19,14 +20,16 @@ FROM ${PYTHON_IMAGE}
 ARG MCP_VERSION=2.3.0
 ARG PILLOW_VERSION=13.0.0
 ARG CRYPTOGRAPHY_VERSION=50.0.2
+ARG PYPDF_VERSION=6.21.4
 
 RUN apt-get update \
     && apt-get install -y --no-install-recommends ca-certificates curl procps \
     && rm -rf /var/lib/apt/lists/*
 RUN python -m pip install --root-user-action=ignore --no-cache-dir \
-        "mcp==${MCP_VERSION}" "pillow==${PILLOW_VERSION}" "cryptography==${CRYPTOGRAPHY_VERSION}"
+        "mcp==${MCP_VERSION}" "pillow==${PILLOW_VERSION}" "cryptography==${CRYPTOGRAPHY_VERSION}" \
+        "pypdf==${PYPDF_VERSION}"
 
 COPY vb_computer_mcp.py rfb.py mac_state.py collect-agent-final.sh cu_check.py /opt/vbdesk/
 RUN chmod 0755 /opt/vbdesk/vb_computer_mcp.py /opt/vbdesk/collect-agent-final.sh \
     && mkdir -p /var/lib/vbmac \
-    && python -c "import sys; sys.path.insert(0, '/opt/vbdesk'); import rfb, mac_state, cu_check, PIL, cryptography, mcp"
+    && python -c "import sys; sys.path.insert(0, '/opt/vbdesk'); import rfb, mac_state, cu_check, PIL, cryptography, mcp, pypdf"

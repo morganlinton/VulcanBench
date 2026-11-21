@@ -1,0 +1,1 @@
+Tidy up my meeting minutes before I send them ("Minutes 2026-03-09.rtf" in Documents): make the first line a bold 18-point heading, make "Decisions" and "Action items" bold, and turn the two decisions and the three action items into bulleted lists. Leave the other lines as they are and save the file.

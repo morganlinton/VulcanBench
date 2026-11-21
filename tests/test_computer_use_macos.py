@@ -152,6 +152,103 @@ def test_calendar_reader_links_detached_occurrences(tmp_path: Path) -> None:
     assert evs[11].start_local is not None and evs[11].start_local.hour == 10
 
 
+def test_contacts_reader_joins_details_and_groups(tmp_path: Path) -> None:
+    db = tmp_path / M.CONTACTS_DB
+    db.parent.mkdir(parents=True)
+    con = sqlite3.connect(db)
+    con.executescript(
+        """CREATE TABLE Z_PRIMARYKEY (Z_ENT INTEGER, Z_NAME TEXT);
+           CREATE TABLE ZABCDRECORD (Z_PK INTEGER PRIMARY KEY, Z_ENT INTEGER, ZFIRSTNAME TEXT,
+             ZLASTNAME TEXT, ZORGANIZATION TEXT, ZJOBTITLE TEXT, ZNICKNAME TEXT, ZNAME TEXT);
+           CREATE TABLE ZABCDPHONENUMBER (Z_PK INTEGER PRIMARY KEY, ZOWNER INTEGER, ZLABEL TEXT, ZFULLNUMBER TEXT);
+           CREATE TABLE ZABCDEMAILADDRESS (Z_PK INTEGER PRIMARY KEY, ZOWNER INTEGER, ZLABEL TEXT, ZADDRESS TEXT);
+           CREATE TABLE ZABCDPOSTALADDRESS (Z_PK INTEGER PRIMARY KEY, ZOWNER INTEGER, ZLABEL TEXT,
+             ZSTREET TEXT, ZCITY TEXT, ZSTATE TEXT, ZZIPCODE TEXT);
+           CREATE TABLE ZABCDNOTE (Z_PK INTEGER PRIMARY KEY, ZCONTACT INTEGER, ZTEXT TEXT);
+           CREATE TABLE Z_22PARENTGROUPS (Z_22CONTACTS INTEGER, Z_19PARENTGROUPS1 INTEGER);
+           INSERT INTO Z_PRIMARYKEY VALUES (19, 'ABCDGroup'), (22, 'ABCDContact');
+           INSERT INTO ZABCDRECORD VALUES (5, 22, 'Chris', 'Park', 'Northwind Labs', 'CTO', NULL, NULL);
+           INSERT INTO ZABCDRECORD VALUES (6, 19, NULL, NULL, NULL, NULL, NULL, 'Vendors');
+           INSERT INTO ZABCDPHONENUMBER VALUES (1, 5, '_$!<Mobile>!$_', '+1 (415) 555-0134');
+           INSERT INTO ZABCDEMAILADDRESS VALUES (1, 5, 'work', 'Chris@Northwind.example');
+           INSERT INTO ZABCDNOTE VALUES (1, 5, 'met at a conference');
+           INSERT INTO Z_22PARENTGROUPS VALUES (5, 6);"""
+    )
+    con.commit()
+    con.close()
+    (c,) = M.contacts(tmp_path)
+    assert c.name == "Chris Park" and c.org == "Northwind Labs" and c.groups == ["Vendors"]
+    assert c.phones == [("mobile", "+1 (415) 555-0134")] and c.phone_keys == {"4155550134"}
+    assert c.email_keys == {"chris@northwind.example"} and c.note == "met at a conference"
+    assert M.contact_groups(tmp_path) == ["Vendors"]
+
+
+def test_preference_readers(tmp_path: Path) -> None:
+    import plistlib  # noqa: PLC0415
+
+    prefs = tmp_path / M.HOME / "Library" / "Preferences"
+    prefs.mkdir(parents=True)
+    trdb = tmp_path / M.TEXT_REPLACEMENTS_DB
+    trdb.parent.mkdir(parents=True)
+    con = sqlite3.connect(trdb)
+    con.executescript(
+        """CREATE TABLE ZTEXTREPLACEMENTENTRY (Z_PK INTEGER PRIMARY KEY, ZWASDELETED INTEGER,
+             ZTIMESTAMP REAL, ZPHRASE TEXT, ZSHORTCUT TEXT);
+           INSERT INTO ZTEXTREPLACEMENTENTRY VALUES (1, 0, 1.0, 'On my way!', 'omw');
+           INSERT INTO ZTEXTREPLACEMENTENTRY VALUES (2, 1, 2.0, 'gone', 'old');"""
+    )
+    con.commit()
+    con.close()
+    # The global-domain mirror alone does not make a replacement work.
+    (prefs / ".GlobalPreferences.plist").write_bytes(
+        plistlib.dumps(
+            {"NSUserDictionaryReplacementItems": [{"on": 1, "replace": "x", "with": "y"}]}
+        )
+    )
+    (prefs / "com.apple.Notes.plist").write_bytes(
+        plistlib.dumps({"NSUserKeyEquivalents": {"Checklist": "@^l"}})
+    )
+    saved = tmp_path / M.SAVED_SEARCHES
+    saved.mkdir(parents=True)
+    (saved / "Recent PDFs.savedSearch").write_bytes(plistlib.dumps({"RawQuery": "x"}))
+    assert M.text_replacements(tmp_path) == {"omw": "On my way!"}
+    assert M.app_shortcuts(tmp_path, "com.apple.Notes") == {"Checklist": "@^l"}
+    assert M.app_shortcuts(tmp_path, "com.apple.Safari") == {}
+    assert M.saved_searches(tmp_path) == {"Recent PDFs": {"RawQuery": "x"}}
+
+
+def test_seedlib_pdf_is_wellformed() -> None:
+    sys.path.insert(0, str(REPO / "scripts" / "computer-use-macos"))
+    import seedlib  # noqa: PLC0415
+
+    data = seedlib.pdf([seedlib.text_page(["# Title", "body (with parens)"]), []])
+    assert data.startswith(b"%PDF-1.4") and data.rstrip().endswith(b"%%EOF")
+    assert b"/Count 2" in data
+    xref = int(data.rsplit(b"startxref", 1)[1].split()[0])
+    assert data[xref : xref + 4] == b"xref"
+    with pytest.raises(UnicodeEncodeError):
+        seedlib.pdf([[seedlib.Line(0, 0, "☃")]])
+
+
+@pytest.mark.parametrize("slug", ["finder-receipts-rename", "preview-contract-packet"])
+def test_pinned_hashes_match_the_seed(slug: str) -> None:
+    """These checkers identify seeded files by SHA-256; the seed must still
+    produce exactly those bytes."""
+    import hashlib  # noqa: PLC0415
+    import importlib.util  # noqa: PLC0415
+
+    task = SUITE / slug
+    spec = importlib.util.spec_from_file_location(
+        "receipts_seed", task / "environment" / "seed_fs.py"
+    )
+    mod = importlib.util.module_from_spec(spec)  # type: ignore[arg-type]
+    spec.loader.exec_module(mod)  # type: ignore[union-attr]
+    got = {hashlib.sha256(b).hexdigest(): rel for rel, b in mod.documents().items()}
+    check = (task / "tests" / "check.py").read_text()
+    for digest, rel in got.items():
+        assert digest in check, rel
+
+
 def test_input_events_skips_garbage(tmp_path: Path) -> None:
     log = tmp_path / "input.log"
     log.write_text('{"kind": "click"}\nnot json\n{"kind": "type"}\n')
@@ -212,3 +309,71 @@ def test_task_is_wired_for_the_tart_environment(slug: str) -> None:
         for key in c["expect"]:
             assert key == "reward" or f'"{key}"' in metrics, (slug, key)
     assert "—" not in (task / "instruction.md").read_text()
+
+
+def test_gold_helper_copies_match() -> None:
+    """Golds import goldlib from their own solution/ (harbor uploads only
+    that directory); every copy must match scripts/computer-use-macos."""
+    src = (REPO / "scripts" / "computer-use-macos" / "goldlib.py").read_text()
+    for drive in sorted(SUITE.glob("*/solution/drive.py")):
+        if "import goldlib" in drive.read_text():
+            copy = drive.parent / "goldlib.py"
+            assert copy.is_file() and copy.read_text() == src, drive.parent.parent.name
+
+
+def test_absurd_dates_read_as_none_not_a_crash() -> None:
+    # A calendar-workshop-update run typed year 22026 into an event's end.
+    far = 631935185400.0 + APPLE
+    ev = M.Event(1, "s", "Work", 0.0, far, False, False, 0, None, None, [])
+    assert ev.local(far) is None
+    assert ev.start_local is not None
+    rem = M.Reminder.__new__(M.Reminder)
+    rem.due, rem.all_day = far, False
+    assert rem.due_date is None
+
+
+def _search_blob(prop: str, value: str, comparison: int) -> bytes:
+    """A Smart List rule archived the way Contacts stores it (macOS 27.2)."""
+    import plistlib  # noqa: PLC0415
+
+    uid = plistlib.UID
+    el = {
+        "ABSearchProperty": uid(3),
+        "ABSearchValue": uid(2),
+        "ABSearchLabel": uid(0),
+        "ABSearchKey": uid(0),
+        "ABSearchPeople": True,
+        "ABSearchVersion": 1,
+        "ABSearchComparison": comparison,
+        "$class": uid(4),
+    }
+    objs = ["$null", el, value, prop, {"$classname": "ABSearchElement"}]
+    top = {"$version": 100000, "$archiver": "NSKeyedArchiver", "$top": {"root": uid(1)}}
+    return plistlib.dumps({**top, "$objects": objs}, fmt=plistlib.FMT_BINARY)
+
+
+def test_smart_groups_reader_evaluates_simple_rules(tmp_path: Path) -> None:
+    db = tmp_path / M.CONTACTS_DB
+    db.parent.mkdir(parents=True)
+    con = sqlite3.connect(db)
+    con.executescript(
+        """CREATE TABLE Z_PRIMARYKEY (Z_ENT INTEGER, Z_NAME TEXT);
+           CREATE TABLE ZABCDRECORD (Z_PK INTEGER PRIMARY KEY, Z_ENT INTEGER, ZNAME TEXT,
+             ZSEARCHELEMENTDATA BLOB);
+           INSERT INTO Z_PRIMARYKEY VALUES (21, 'ABCDSmartGroup');"""
+    )
+    rows = [
+        (1, "Northwind", _search_blob("Organization", "northwind traders", 8)),
+        (2, "Exact", _search_blob("Organization", "northwind traders", 0)),
+        (3, "Odd", _search_blob("Birthday", "x", 8)),
+        (4, "Broken", b"not a plist"),
+    ]
+    con.executemany("INSERT INTO ZABCDRECORD VALUES (?, 21, ?, ?)", rows)
+    con.commit()
+    con.close()
+    sg = M.smart_groups(tmp_path)
+    card = M.Contact(1, "Mei", "Chen", "Northwind Traders", "COO", "", [], [], [], "", [])
+    other = M.Contact(2, "Ivy", "Walsh", "Brightwave Printing", "", "", [], [], [], "", [])
+    assert sg["Northwind"].matches(card) and not sg["Northwind"].matches(other)
+    assert not sg["Exact"].matches(card)  # case-sensitive equal
+    assert not sg["Odd"].matches(card) and not sg["Broken"].matches(card)  # fail safe

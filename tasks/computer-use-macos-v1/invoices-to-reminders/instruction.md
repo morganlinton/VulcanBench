@@ -1,0 +1,1 @@
+The invoices folder in my Downloads has this month's bills. For each one I still have to pay, add a reminder to a new Reminders list called "Bills", titled "Pay" and the vendor's name, due on the day payment is due, with the amount in the reminder.

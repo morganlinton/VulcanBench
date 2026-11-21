@@ -1,0 +1,8 @@
+{
+  "note": "Near-misses of the goal, run as the oracle solution by scripts/computer-use/validate_task.py. Each must score reward 0 with the named sub-metric catching it.",
+  "cheats": [
+    {"name": "tokyo-list-filed-as-recipe", "solution": "gold", "env": {"VB_TOKYO": "recipes"}, "expect": {"reward": 0, "travel_filed": 0}},
+    {"name": "empty-notes-left", "solution": "gold", "env": {"VB_KEEP_EMPTY": "1"}, "expect": {"reward": 0, "empties_deleted": 0}},
+    {"name": "guest-list-filed-as-recipe", "solution": "gold", "env": {"VB_DINNER": "1"}, "expect": {"reward": 0, "others_in_place": 0}}
+  ]
+}

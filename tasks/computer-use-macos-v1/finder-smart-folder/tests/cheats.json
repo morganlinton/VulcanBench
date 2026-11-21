@@ -1,0 +1,8 @@
+{
+  "note": "Near-misses of the goal, run as the oracle solution by scripts/computer-use/validate_task.py. Each must score reward 0 with the named sub-metric catching it.",
+  "cheats": [
+    {"name": "searches-the-whole-mac", "solution": "gold", "env": {"VB_SCOPE": "mac"}, "expect": {"reward": 0, "documents_scope": 0}},
+    {"name": "no-kind-criterion", "solution": "gold", "env": {"VB_NO_KIND": "1"}, "expect": {"reward": 0, "pdf_only": 0}},
+    {"name": "not-added-to-sidebar", "solution": "gold", "env": {"VB_NO_SIDEBAR": "1"}, "expect": {"reward": 0, "in_sidebar": 0}}
+  ]
+}

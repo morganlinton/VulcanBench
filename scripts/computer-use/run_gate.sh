@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # ComputerUse v1 reference-model gate runner (docs/COMPUTER_USE_CHARTER.md).
 #
-# usage: scripts/computer-use/run_gate.sh <claude-code|codex|claude> <task> [<task> ...]
+# usage: scripts/computer-use/run_gate.sh <claude-code|codex|codex-terra|claude> <task> [<task> ...]
 #        scripts/computer-use/run_gate.sh --refs
 #        GATE_PREFLIGHT_ONLY=1 scripts/computer-use/run_gate.sh <ref> [<task>]
 #
@@ -63,6 +63,10 @@
 # bring-up failure in a trial's agent logs, trial log or the job log stops
 # the whole run; such trials are not gate results.
 #
+# Missing-tool guard: a finished trial whose agent never had the computer
+# tools (the MCP server did not load) is infra_failed with stop_reason
+# no-computer-tools:<trial>, not a gate result.
+#
 # Tool-surface guard (codex): an event in a trial's codex.txt for a tool the
 # row must not have (a shell command, a file change, a web search, a
 # subagent, an image generation) stops the run with stop_reason
@@ -98,11 +102,12 @@ set -u
 if [ "${1:-}" = --refs ]; then
   echo '{"name": "claude-code", "agent": "claude-code", "auth": "subscription", "model": "pins.references[claude-code].model in tasks/computer-use-v1/suite.json (CU_GATE_MODEL overrides)"}'
   echo '{"name": "codex", "agent": "codex", "auth": "subscription", "model": "pins.references[codex].model in tasks/computer-use-v1/suite.json (CU_GATE_MODEL overrides)"}'
+  echo '{"name": "codex-terra", "agent": "codex", "auth": "subscription", "model": "pins.references[codex-terra].model in the suite.json (CU_GATE_MODEL overrides); same config and catalog rules as codex"}'
   echo '{"name": "claude", "agent": "computer-1", "auth": "api-key", "model": "pins.references[claude].model in tasks/computer-use-v1/suite.json (CU_GATE_MODEL overrides)"}'
   exit 0
 fi
 preflight_only="${GATE_PREFLIGHT_ONLY:-0}"
-ref="${1:?usage: run_gate.sh <claude-code|codex|claude> <task> [<task> ...]}"; shift
+ref="${1:?usage: run_gate.sh <claude-code|codex|codex-terra|claude> <task> [<task> ...]}"; shift
 [ $# -gt 0 ] || [ "$preflight_only" = 1 ] || { echo "cu-gate: name at least one task" >&2; exit 2; }
 here="$(cd "$(dirname "$0")/../.." && pwd)"
 export PATH="$HOME/.local/bin:/usr/local/bin:/opt/homebrew/bin:$PATH"
@@ -152,12 +157,14 @@ case "$ref" in
     [ -f "$envf" ] || { echo "cu-gate: $envf missing (one line CLAUDE_CODE_OAUTH_TOKEN=... from \`claude setup-token\`)" >&2; exit 2; }
     auth_args=(--env-file "$envf")
     if [ "${FABLE_AUTH:-oauth}" = api ]; then auth_env=(); else auth_env=(CLAUDE_FORCE_OAUTH=1); fi ;;
-  codex)
+  codex|codex-terra)
+    # codex-terra: a second Codex row (GPT-6.1 Terra) with everything else as
+    # the codex row; its own ref keeps its job names and status files apart.
     agent=codex
-    model="${CU_GATE_MODEL:-$(pin codex model)}"
-    version="${CU_GATE_CODEX_VERSION:-$(pin codex version)}"
-    [ -n "$model" ] || { echo "cu-gate: no model: set CU_GATE_MODEL or pins.references[codex].model in $suite_json" >&2; exit 2; }
-    [ -n "$version" ] || { echo "cu-gate: no Codex version: pins.references[codex].version in $suite_json" >&2; exit 2; }
+    model="${CU_GATE_MODEL:-$(pin "$ref" model)}"
+    version="${CU_GATE_CODEX_VERSION:-$(pin "$ref" version)}"
+    [ -n "$model" ] || { echo "cu-gate: no model: set CU_GATE_MODEL or pins.references[$ref].model in $suite_json" >&2; exit 2; }
+    [ -n "$version" ] || { echo "cu-gate: no Codex version: pins.references[$ref].version in $suite_json" >&2; exit 2; }
     codex_cfg="$here/scripts/computer-use/codex-gate.toml"
     [ -f "$codex_cfg" ] || { echo "cu-gate: $codex_cfg missing" >&2; exit 2; }
     effort_label="${CU_GATE_EFFORT:-medium}"
@@ -184,7 +191,7 @@ case "$ref" in
     [ -f "$envf" ] || { echo "cu-gate: $envf missing (one line ANTHROPIC_API_KEY=...)" >&2; exit 2; }
     grep -q '^ANTHROPIC_API_KEY=.' "$envf" || { echo "cu-gate: $envf has no ANTHROPIC_API_KEY= line" >&2; exit 2; }
     set -a; . "$envf"; set +a ;;
-  *) echo "cu-gate: reference must be claude-code, codex or claude" >&2; exit 2 ;;
+  *) echo "cu-gate: reference must be claude-code, codex, codex-terra or claude" >&2; exit 2 ;;
 esac
 
 if [ "$condition" != pixels+zoom ] && [ "$agent" = computer-1 ]; then
@@ -223,6 +230,14 @@ preflight() { # host checks; prints one problem per line, returns 1 on any
   docker image inspect "$IMAGE" >/dev/null 2>&1 || { echo "cu-gate: $IMAGE not built (make sandbox-image-computer-use$( [ "$macos" = 1 ] && echo -macos))" >&2; rc=1; }
   if [ "$macos" = 1 ]; then
     command -v tart >/dev/null || { echo "cu-gate: tart not found (brew install openai/tools/tart)" >&2; rc=1; }
+    # A trial clones a VM and grows it as the agent works, and a full disk
+    # (2026-11-14) took Docker down mid-trial and hung every lane. Refuse to
+    # start below GATE_MIN_FREE_GB on the volume that holds Tart's VMs.
+    local free_gb min_gb="${GATE_MIN_FREE_GB:-60}"
+    free_gb=$(df -Pk "${TART_HOME:-$HOME/.tart}" 2>/dev/null | awk 'NR==2{printf "%d", $4/1048576}')
+    if [ -n "$free_gb" ] && [ "$free_gb" -lt "$min_gb" ]; then
+      echo "cu-gate: ${free_gb} GB free for Tart VMs, under GATE_MIN_FREE_GB=${min_gb}" >&2; rc=1
+    fi
   fi
   if [ "$agent" = codex ] && [ -z "${CU_GATE_CODEX_CATALOG_SOURCE:-}" ]; then
     command -v codex >/dev/null || { echo "cu-gate: no codex CLI on PATH (needed for \`codex debug models\`; or set CU_GATE_CODEX_CATALOG_SOURCE)" >&2; rc=1; }
@@ -307,7 +322,7 @@ fi
 # Frontier gate matches; computer-1's desktop bring-up timeouts and the MCP
 # server's display failure (harbor/agents/computer_1/runtime.py,
 # sandbox/computer-use/ensure-display.sh).
-INFRA_RE='authentication_error|invalid_api_key|insufficient_quota|rate_limit_error|overloaded_error|No module named .anthropic.|"error":"authentication_failed"|OAuth access token is invalid|issue with the selected model|requires usage credits|hit your usage limit|Chromium did not become ready|did not become ready within|X11 display :1 never appeared|not a computer-use model|refresh_token_reused|Your access token could not be refreshed|unexpected status 401|usage_limit_reached|NetworkConnectionError|Download failed|the trial.s VM exited|guest session not up|the VM exited while booting'
+INFRA_RE='authentication_error|invalid_api_key|insufficient_quota|rate_limit_error|overloaded_error|No module named .anthropic.|"error":"authentication_failed"|OAuth access token is invalid|issue with the selected model|requires usage credits|hit your usage limit|Chromium did not become ready|did not become ready within|X11 display :1 never appeared|not a computer-use model|refresh_token_reused|Your access token could not be refreshed|unexpected status 401|usage_limit_reached|NetworkConnectionError|Download failed|the trial.s VM exited|guest session not up|the VM exited while booting|Collect hook in service .main. failed ..vbmac-collect'
 # Codex exec --json item types for tools the codex row must not have (the
 # tool-surface guard; codex.txt only).
 SURFACE_RE='"type": ?"(command_execution|file_change|web_search|collab_tool_call|image_generation)"'
@@ -363,14 +378,31 @@ stop_sandboxes() { # task name -> remove this task's leftover sandbox containers
   # Harbor names a trial's compose project <first 32 chars of the task name>__<trial id>__env.
   local prefix ids n
   prefix=$(printf '%s' "${1:0:32}" | tr 'A-Z' 'a-z')
-  ids=$(docker ps -aq --filter "name=^${prefix}__" 2>/dev/null)
+  # Leftovers are stopped, or still running hours after their trial ended.
+  # A container that is running and less than 2 hours old belongs to a run in
+  # progress (a validation of this task beside the sweep) and is left alone.
+  ids=$(docker ps -a --filter "name=^${prefix}__" --format '{{.ID}} {{.State}} {{.CreatedAt}}' 2>/dev/null | python3 -c '
+import sys, datetime as d
+now = d.datetime.now(d.timezone.utc)
+for line in sys.stdin:
+    cid, state, rest = (line.split(" ", 2) + ["", ""])[:3]
+    try:
+        made = d.datetime.strptime(" ".join(rest.split()[:3]), "%Y-%m-%d %H:%M:%S %z")
+        young = (now - made).total_seconds() < 7200
+    except ValueError:
+        young = False
+    if not (state == "running" and young):
+        print(cid)
+')
   [ -n "$ids" ] && { echo "--- $1: removing leftover sandbox containers"; docker rm -f $ids >/dev/null 2>&1; }
   for n in $(docker network ls -q --filter "name=^${prefix}__" 2>/dev/null); do docker network rm "$n" >/dev/null 2>&1; done
   if [ "$macos" = 1 ]; then
     # A trial VM the environment could not delete (harbor stopped mid-run).
-    # Sweeps run one trial at a time, so a stopped trial VM is a leftover.
+    # Sweeps run one trial at a time, so a stopped trial VM of this task is a
+    # leftover; other tasks' VMs (a validation running beside the sweep, its
+    # VM stopped while the disk is read) are left alone.
     local vm
-    for vm in $(tart list 2>/dev/null | awk '$2 ~ /^vbmac-trial-/ && $NF == "stopped" {print $2}'); do
+    for vm in $(tart list 2>/dev/null | awk -v p="vbmac-trial-$1-" '$NF == "stopped" && index($2, p) == 1 {print $2}'); do
       echo "--- $1: deleting leftover VM $vm"; tart delete "$vm" >/dev/null 2>&1
     done
   fi
@@ -393,6 +425,23 @@ infra_hit() { # job dir -> prints the first trial (or "job-log") with an infrast
     if grep -rqE "$INFRA_RE" "$tr/agent" "$tr/trial.log" "$tr/result.json" 2>/dev/null; then basename "$tr"; return; fi
   done
   if grep -qE "$INFRA_RE" "$OUT/$job.log" 2>/dev/null; then echo "job-log"; fi
+}
+
+tools_missing_hit() { # job dir -> prints the first trial whose agent never had the computer tools
+  # The MCP server can fail to load without an error the agent logs show (a
+  # Terra trial on 2026-11-14 got only the clock and MCP-resource tools, said
+  # it could not reach the Mac, and scored 0). codex prints its tool list into
+  # the session rollout; Claude Code lists its tools in the init event.
+  local tr ok
+  for tr in "$1"/*__*; do
+    [ -d "$tr/agent" ] || continue
+    case "$agent" in
+      codex) grep -qs 'computer__screenshot' $(find "$tr/agent/sessions" -name 'rollout*.jsonl' 2>/dev/null) /dev/null; ok=$? ;;
+      claude-code) grep -qs 'mcp__computer__screenshot' "$tr/agent/claude-code.txt"; ok=$? ;;
+      *) continue ;;
+    esac
+    [ "$ok" = 0 ] || { basename "$tr"; return; }
+  done
 }
 
 stop_harbor() { # SIGINT harbor (its cancel path runs `docker compose down`), escalate, reap, sweep
@@ -535,6 +584,8 @@ os.execvp(sys.argv[1], sys.argv[1:])' \
   [ -n "$bad" ] && { echo "!!! $t: tool-surface breach in $bad; not a gate result"; write_status infra_failed "$hcode" "tool-surface:$bad"; exit 1; }
   bad=$(infra_hit "$OUT/jobs/$job")
   [ -n "$bad" ] && { echo "!!! $t: infrastructure failure in $bad; not a gate result"; write_status infra_failed "$hcode" "infra:$bad"; exit 1; }
+  bad=$(tools_missing_hit "$OUT/jobs/$job")
+  [ -n "$bad" ] && { echo "!!! $t: the agent in $bad never had the computer tools; not a gate result"; write_status infra_failed "$hcode" "no-computer-tools:$bad"; exit 1; }
   print_trials "$OUT/jobs/$job"
   echo "--- $t: $(solves "$OUT/jobs/$job") solve(s) of $attempts $(date '+%F %H:%M:%S')"
   write_status done "$hcode"

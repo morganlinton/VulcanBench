@@ -1,0 +1,1 @@
+Priya's plan for the four-session onboarding workshop is in the Workshop folder in /Users/Shared. Put the sessions in my Work calendar the way the plan says. She told me she'll drop a correction into that folder a couple of minutes after you start on this, so wait for it, and make sure the calendar matches the corrected plan when you're done.

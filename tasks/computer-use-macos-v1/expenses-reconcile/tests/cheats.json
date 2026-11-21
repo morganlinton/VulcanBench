@@ -1,0 +1,10 @@
+{
+  "note": "Near-misses of the goal, run as the oracle solution by scripts/computer-use/validate_task.py. Each must score reward 0 with the named sub-metric catching it.",
+  "cheats": [
+    {"name": "one-amount-left-wrong", "solution": "gold", "env": {"VB_NOFIX": "1"}, "expect": {"reward": 0, "amounts_fixed": 0}},
+    {"name": "personal-dinner-kept", "solution": "gold", "env": {"VB_KEEP_PERSONAL": "1"}, "expect": {"reward": 0, "personal_out": 0}},
+    {"name": "missing-lines-appended-at-the-end", "solution": "gold", "env": {"VB_APPEND": "1"}, "expect": {"reward": 0, "date_order": 0}},
+    {"name": "old-total-kept", "solution": "gold", "env": {"VB_TOTAL": "old"}, "expect": {"reward": 0, "total_right": 0}},
+    {"name": "receipts-not-filed", "solution": "gold", "env": {"VB_NOMOVE": "1"}, "expect": {"reward": 0, "receipts_filed": 0}}
+  ]
+}

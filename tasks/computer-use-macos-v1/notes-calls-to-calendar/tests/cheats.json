@@ -1,0 +1,8 @@
+{
+  "note": "Near-misses of the goal, run as the oracle solution by scripts/computer-use/validate_task.py. Each must score reward 0 with the named sub-metric catching it.",
+  "cheats": [
+    {"name": "london-five-hours", "solution": "gold", "env": {"VB_LONDON_HOUR": "9"}, "expect": {"reward": 0, "london_dst": 0}},
+    {"name": "ana-on-tuesday", "solution": "gold", "env": {"VB_ANA_DAY": "10"}, "expect": {"reward": 0, "lisbon_update": 0}},
+    {"name": "tentative-added", "solution": "gold", "env": {"VB_ADD_LENA": "1"}, "expect": {"reward": 0, "tentative_skipped": 0}}
+  ]
+}

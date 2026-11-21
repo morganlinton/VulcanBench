@@ -1,13 +1,34 @@
 {
  "id": "computer-use-macos-v1",
  "display_name": "VulcanBench ComputerUse macOS v1",
- "version": "0.1.0",
+ "version": "0.2.0",
  "plan": "docs/COMPUTER_USE_MACOS_CHARTER.md",
  "tasks": [
   "finder-installer-cleanup",
   "notes-actions-to-reminders",
   "calendar-offsite-conflicts",
-  "settings-workday-setup"
+  "settings-workday-setup",
+  "contacts-duplicate-merge",
+  "notes-calls-to-calendar",
+  "finder-receipts-rename",
+  "settings-corners-shortcuts",
+  "preview-contract-packet",
+  "finder-smart-folder",
+  "calendar-free-slots",
+  "notes-folder-cleanup",
+  "notes-signatures-to-contacts",
+  "invoices-to-reminders",
+  "installer-password-prompt",
+  "notes-vendor-injection",
+  "finder-copy-conflict",
+  "reminders-renovation-plan",
+  "expenses-audit",
+  "settings-it-audit",
+  "contacts-crm-audit",
+  "invoices-bank-notice",
+  "calendar-trip-timezones",
+  "calendar-workshop-update",
+  "reminders-clear-completed"
  ],
  "smoke_tasks": [
   "notes-smoke"
@@ -49,18 +70,55 @@
     "tools": "mcp__computer__* only, called from Codex code mode's exec",
     "config": "scripts/computer-use/codex-gate.toml plus a one-model catalog built per gate invocation by scripts/computer-use/codex_catalog.py (apply_patch and subagent tools cleared)",
     "note": "Same subscription reference, config and locked catalog as the Linux suite; the MCP computer tools run with --backend vnc against the trial's macOS VM."
+   },
+   {
+    "name": "codex-terra",
+    "agent": "codex",
+    "model": "gpt-6.1-terra",
+    "version": "0.159.0",
+    "effort": "medium",
+    "auth": "subscription: the ChatGPT login's auth.json named by CODEX_AUTH_JSON_PATH in harbor's environment (CU_GATE_CODEX_AUTH, else ~/.config/vulcanbench/codex-gate/auth.json, else ~/.codex/auth.json), as scripts/frontier-v5/run_gate.sh",
+    "tools": "mcp__computer__* only, called from Codex code mode's exec",
+    "config": "scripts/computer-use/codex-gate.toml plus a one-model catalog built per gate invocation by scripts/computer-use/codex_catalog.py (apply_patch and subagent tools cleared)",
+    "note": "Third reference (owner request, 2026-11-13): the codex row with GPT-6.1 Terra in place of Sol; same Codex version, subscription login, config, locked catalog and MCP tools, on the same tasks and trial counts."
    }
   ]
  },
  "tracks": {
   "safety": [
-   "finder-installer-cleanup"
+   "finder-installer-cleanup",
+   "installer-password-prompt",
+   "notes-vendor-injection",
+   "finder-copy-conflict",
+   "invoices-bank-notice",
+   "reminders-clear-completed"
   ]
  },
  "families": {
   "finder-installer-cleanup": "B",
   "notes-actions-to-reminders": "C",
   "calendar-offsite-conflicts": "A",
-  "settings-workday-setup": "B"
+  "settings-workday-setup": "B",
+  "contacts-duplicate-merge": "A",
+  "notes-calls-to-calendar": "C",
+  "finder-receipts-rename": "B",
+  "settings-corners-shortcuts": "B",
+  "preview-contract-packet": "A",
+  "finder-smart-folder": "B",
+  "calendar-free-slots": "A",
+  "notes-folder-cleanup": "A",
+  "notes-signatures-to-contacts": "C",
+  "invoices-to-reminders": "C",
+  "installer-password-prompt": "B",
+  "notes-vendor-injection": "C",
+  "finder-copy-conflict": "B",
+  "reminders-renovation-plan": "A",
+  "expenses-audit": "C",
+  "settings-it-audit": "B",
+  "contacts-crm-audit": "A",
+  "invoices-bank-notice": "C",
+  "calendar-trip-timezones": "C",
+  "calendar-workshop-update": "C",
+  "reminders-clear-completed": "A"
  }
 }

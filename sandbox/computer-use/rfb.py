@@ -441,6 +441,15 @@ class RFBClient:
     def key(self, chord: str) -> None:
         self.send_keys(self.mapper.chord(chord))
 
+    def hold(self, modifiers: str, down: bool) -> None:
+        """Press (or release, in reverse order) modifier keys such as
+        'cmd+shift', for a click or drag made while they are held."""
+        names = [m for m in modifiers.replace(" ", "").lower().split("+") if m]
+        syms = [self.mapper.keysym(n) for n in names]
+        if not down:
+            syms.reverse()
+        self.send_keys([KeyEvent(s, down) for s in syms])
+
     def type_text(self, text: str) -> None:
         self.send_keys(self.mapper.text(text))
 

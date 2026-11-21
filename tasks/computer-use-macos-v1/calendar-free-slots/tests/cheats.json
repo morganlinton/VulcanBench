@@ -1,0 +1,8 @@
+{
+  "note": "Near-misses of the goal, run as the oracle solution by scripts/computer-use/validate_task.py. Each must score reward 0 with the named sub-metric catching it.",
+  "cheats": [
+    {"name": "workshop-over-the-standup", "solution": "gold", "env": {"VB_WORKSHOP": "standup"}, "expect": {"reward": 0, "workshop_slot": 0}},
+    {"name": "budget-on-the-workshop-day", "solution": "gold", "env": {"VB_BUDGET": "wed"}, "expect": {"reward": 0, "budget_slot": 0}},
+    {"name": "priya-over-lunch", "solution": "gold", "env": {"VB_PRIYA": "lunch"}, "expect": {"reward": 0, "priya_slot": 0}}
+  ]
+}

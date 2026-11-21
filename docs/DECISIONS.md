@@ -538,6 +538,141 @@ R2 to R9 stay open and are recorded as their own entries when decided.
 This entry, the R1 status in [frontier-v5/ROLLOUT.md](frontier-v5/ROLLOUT.md)
 and the suite names section of CLAUDE.md. No run conditions changed.
 
+## 2026-11-19: Gemini 4 Neon on Frontier v4 through Antigravity CLI, with a custom agent for web-off
+
+### Decision
+
+The owner asked to benchmark Google's new model Neon. Gemini 4 Neon
+(`gemini-4-neon`, released 2026-11-18) runs on VulcanBench Frontier v4 in
+Google's own harness (the native-harness rule), one task at a time from a
+tagged run worktree under the flat 3-hour task timeout, like every sweep.
+
+- Harness: Antigravity CLI (`agy`), print mode
+  (`agy -p --output-format stream-json`), adapter
+  `harness/agent/antigravity_cli.py`, spec `agy:gemini-4-neon`. Gemini CLI is
+  not used: Google AI Pro and Ultra moved to agy on 2026-06-18, and Gemini CLI's
+  own README says not to use it to benchmark Gemini models. Pinned to agy
+  1.5.12 by the sha256 of the darwin-arm64 binary from Google's release
+  tarball (manifest sha512 checked), kept in
+  `~/.local/share/vulcanbench/agy-1.5.12/`. agy's updater skips the update
+  when the binary's directory is not writable, which is how the pin holds:
+  the run sandbox gives no write access there, and the operator keeps the
+  directory read-only (`chmod 555`) for agy calls made outside a run, such
+  as `agy models` or the launcher's quota probe. `AGY_CLI_DISABLE_AUTO_UPDATE`
+  does not turn the updater off (see Evidence); the adapter still sets it.
+- Billing (owner decision 2026-11-19): the owner's Google AI Pro plan through
+  agy's Google sign-in, not an API key. Cost is reported as the API-equivalent
+  at list price. `useG1Credits` is off, so a run never spends paid AI credits
+  past the plan quota; a quota refusal is infrastructure, and the sweep's quota
+  wait applies. AI Pro's quota resets every 5 hours under a weekly cap, so the
+  sweep may pause between tasks; disclose it.
+- Effort (owner decision 2026-11-19: every level agy offers, as for every
+  model): `agy models` lists `gemini-4-neon-low`, `-medium`, `-high` and
+  `-xhigh`, so Neon runs Low, Medium, High and Extra-high (92 runs). There is no
+  Max or minimal for this model. agy encodes effort in the model slug; the
+  adapter checks that the stream's init event names the requested slug.
+- Web tools off (owner decision 2026-11-19: custom agent). agy has no setting
+  that removes `search_web`: permission `deny` rules remove URL reads, browser
+  navigation and MCP, but agy accepts an unknown action such as
+  `search_web(*)` silently and the model still searched (three probes). The run
+  therefore uses a custom main agent, `vulcanbench`, whose `tools` allowlist is
+  the default agent's file and shell tools (`read_file`, `write_file`,
+  `edit_file`, `run_command`; agy adds `manage_task`). A custom agent's body
+  replaces agy's identity block, so the body is agy 1.5.12's own identity text,
+  copied verbatim from the binary's template. The `deny` rules stay on as a
+  second layer, and any call to a tool outside the allowlist voids the run.
+- Private `HOME` per run, holding only the custom agent and agy's per-run
+  state, so no earlier conversation, summary or setting is visible. macOS finds
+  the login keychain through `$HOME/Library/Keychains`, so that directory is
+  linked in for the sign-in token. rustup, cargo and Go keep the operator's
+  toolchain directories (`RUSTUP_HOME`, `CARGO_HOME`, `GOPATH`).
+
+Settings that follow the board's existing rules, not new choices: agy's
+always-proceed permissions (`--dangerously-skip-permissions`) inside the macOS
+outer sandbox Kimi Code and Mirror use, with agy's own `--sandbox` off because
+sandbox-exec cannot nest; the real `~/.gemini` is denied to the run;
+pseudo-terminals are allowed because agy runs every command in a PTY; zsh's
+`TMPPREFIX` points into the run's private temp directory, like `TMPDIR`. No other
+agy default changes.
+
+Prices (checked 2026-11-19 at aistudio.google.com/docs/pricing, standard paid
+tier), per million tokens: $3.00 input, $0.15 cached input (implicit caching),
+$15.00 output including thinking, flat across the context. Usage is the sum of
+the per-step `usage` in the stream (fresh input, cache reads, output with
+thinking included) and must equal the result event's totals. Tool calls come
+from the stream's tool steps.
+
+### Evidence
+
+Probes on 2026-11-19, on the AI Pro sign-in, at `gemini-4-neon-low`:
+
+- Headless stream-json works with no TTY and stdin closed (agy issues #76 and
+  #318 did not reproduce). `total_tokens` equals input plus output, and output
+  includes thinking (a 15-token output step held 13 thinking tokens and the
+  2-token answer).
+- The default agent's tools, as the model reports them: `read_file`,
+  `write_file`, `edit_file`, `run_command`, `manage_task`, `schedule`,
+  `search_web`, `ask_question`, `define_subagent`, `invoke_subagent`,
+  `manage_subagents`, `send_message`, `run_workflow`, `swarm`. The init event
+  lists 60 names that the model does not get. With the custom agent the model
+  has `read_file`, `write_file`, `edit_file`, `run_command` and `manage_task`,
+  and reports `search_web` unavailable.
+- Asked to quote its system instructions, the default agent opens with the
+  `<identity>` block; the custom agent opens with its own body, keeps
+  `<guidelines>`, `<communication_style>`, `<artifacts>` and `<messaging>`, and
+  has no subagents, skills, slash-command or conversation-transcript sections.
+- A fresh `HOME` loses the sign-in; linking only `Library/Keychains` restores
+  it. The same 11 "not logged into Antigravity" startup log lines appear with
+  the real `HOME`, so they are not a sign-in failure.
+- Without the PTY rules every `run_command` failed ("failed to create PTY:
+  operation not permitted"). Smoke runs on `hello-world` at Low, from the
+  working checkout (not board data): solved before and after the fix; after it,
+  `ls` and `python hello.py` ran with exit code 0, $0.036 API-equivalent.
+- Self-update (2026-11-19, 14:46 PST): agy 1.6.1 was released, and an
+  operator `agy models` call outside the sandbox, with
+  `AGY_CLI_DISABLE_AUTO_UPDATE=1` set, replaced the pinned binary in place
+  (the old one kept beside it as `agy.<n>.old`). agy's own log shows the
+  updater starting at every unsandboxed start since the first probe
+  ("Spawned background update process", then "Last check was less than 15
+  minutes ago"); it only had nothing newer to install before. The
+  launcher's pin check stopped the sweep before any task ran. The 1.5.12
+  binary was restored from the `.old` copy (sha256 matches the pin) and the
+  directory made read-only; agy then logs "is not fully accessible
+  (readable: true, writable: false), skipping update". The two sandboxed
+  smoke runs logged the same skip, so no run was exposed.
+- Here-documents (2026-11-19, 23:30 PST, first Low task of the sweep):
+  `python3 - <<'EOF'` failed with "can't create temp file for here document:
+  operation not permitted". agy runs commands in zsh, which writes heredoc
+  temp files under `TMPPREFIX` (default `/tmp/zsh`), not `TMPDIR`, and the
+  outer sandbox denies `/tmp`. No earlier sweep has the error (Kimi Code,
+  Mirror and dsh shells use `TMPDIR`). Reproduced with the adapter's own
+  sandbox profile and plain zsh: the heredoc fails without `TMPPREFIX` and
+  works with it set to the run's temp directory. The sweep was paused after
+  that one task, which was moved aside as void (not board data). The
+  `xcrun_db` cache warnings in the same run also appear in the Kimi Code,
+  Mirror and dsh sweeps and are left as they are.
+
+### Limits
+
+The custom agent is a disclosed difference from agy's default agent: the
+identity text is agy's own, but the sections that go with the removed tools are
+absent, and the model cannot delegate to subagents. The sign-in token is
+reachable from the run's keychain link and shell network is not isolated. The
+task prompt is an argument (print mode), so it is visible in the host's process
+table during a run. agy records the model slug it was asked for, not a served
+model id, so identity is `harness-recorded`.
+
+### Revisit triggers
+
+- A newer agy, or a setting that turns off `search_web` in the default agent:
+  re-probe, and drop the custom agent if web search can be removed without it.
+- Any run voided for calling a tool outside the allowlist: stop and look.
+- Re-pinning agy (1.6.1 is kept at `~/.local/share/vulcanbench/agy-1.6.1/`):
+  a new adapter pin, bench tag and smoke run, and the new directory made
+  read-only before its first unsandboxed call.
+- AI Pro quota waits that stretch the sweep past several days: ask the owner
+  about Ultra or the API key.
+
 ## 2026-11-18: GPT-6.2 Sol's Code quality is judged by Muse Spark 1.3 and Grok 4.6 (v3.31)
 
 ### Decision

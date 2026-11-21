@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Frontier v5 admission gate runner (docs/frontier-v5/GATE-LOG.md).
 #
-# usage: scripts/frontier-v5/run_gate.sh <astra|fable|opus> <task> [<task> ...]
+# usage: scripts/frontier-v5/run_gate.sh <astra|sol62|fable|opus> <task> [<task> ...]
 #        scripts/frontier-v5/run_gate.sh --refs
 #        GATE_PREFLIGHT_ONLY=1 scripts/frontier-v5/run_gate.sh <ref> [<task>]
 #
@@ -14,6 +14,16 @@
 #   fable  harbor -a claude-code -m claude-fable-5-1  Claude Code 2.1.302, medium
 #   opus   harbor -a claude-code -m claude-opus-5-5   Claude Code 2.1.302, medium
 #          (second reference for wave 1 from 2026-10-25, docs/DECISIONS.md)
+#   sol62  harbor -a codex       -m gpt-6.2-sol       Codex CLI 0.166.0,   medium
+#          (not a gate reference: the release 1 top-effort measurement of
+#          decision R3, docs/DECISIONS.md 2026-11-19; Codex 0.159.0 refuses
+#          gpt-6.2-sol, 0.166.0 is its Frontier v4 pin)
+#
+# GATE_EFFORT (default medium) sets the reasoning effort: low, medium, high,
+# xhigh or max. Levels in vulcanbench.toml's [effort].blocked ("ultra") are
+# refused. Every gate admission ran at medium, so any other level is a
+# measurement, not a gate result; its job name carries the level
+# (<ref>-<effort>-<task>), and the === line and status file record it.
 #
 # Concurrency follows decision (e): Python and JavaScript tasks run two
 # attempts at a time, compiled and JVM tasks one (16 GiB hosts).
@@ -55,7 +65,7 @@
 # harbor's result.json, which has no finished_at on a cancelled job.
 #
 # Authentication (never read or printed by this script):
-#   astra  a dedicated ChatGPT login for gate runs, with no connected apps,
+#   astra, sol62  a dedicated ChatGPT login for gate runs, with no connected apps,
 #          in ~/.config/vulcanbench/codex-gate/auth.json
 #          (`CODEX_HOME=~/.config/vulcanbench/codex-gate codex login`), or the
 #          file GATE_CODEX_AUTH names; without one, the personal login in
@@ -106,10 +116,11 @@ if [ "${1:-}" = --refs ]; then
   echo '{"name": "astra", "agent": "codex", "model": "gpt-6-astra", "version": "0.159.0"}'
   echo '{"name": "fable", "agent": "claude-code", "model": "claude-fable-5-1", "version": "2.1.302"}'
   echo '{"name": "opus", "agent": "claude-code", "model": "claude-opus-5-5", "version": "2.1.302"}'
+  echo '{"name": "sol62", "agent": "codex", "model": "gpt-6.2-sol", "version": "0.166.0"}'
   exit 0
 fi
 preflight_only="${GATE_PREFLIGHT_ONLY:-0}"
-ref="${1:?usage: run_gate.sh <astra|fable|opus> <task> [<task> ...]}"; shift
+ref="${1:?usage: run_gate.sh <astra|sol62|fable|opus> <task> [<task> ...]}"; shift
 [ $# -gt 0 ] || [ "$preflight_only" = 1 ] || { echo "run_gate: name at least one task" >&2; exit 2; }
 here="$(cd "$(dirname "$0")/../.." && pwd)"
 export PATH="$HOME/.local/bin:$HOME/.local/node/bin:/usr/local/bin:/opt/homebrew/bin:$PATH"
@@ -120,12 +131,21 @@ attempts="${GATE_ATTEMPTS:-3}"; suffix="${GATE_JOB_SUFFIX:-}"
 case "$attempts" in 1|2|3) ;; *) echo "run_gate: GATE_ATTEMPTS must be 1, 2 or 3 (got $attempts)" >&2; exit 2 ;; esac
 early_exit="${GATE_EARLY_EXIT:-1}"
 case "$early_exit" in 0|1) ;; *) echo "run_gate: GATE_EARLY_EXIT must be 0 or 1 (got $early_exit)" >&2; exit 2 ;; esac
+effort="${GATE_EFFORT:-medium}"
+# Blocked levels never run on any model (vulcanbench.toml [effort].blocked,
+# docs/DECISIONS.md 2026-09-16); the list is read from the operator file.
+blocked=$(sed -n 's/^blocked *= *\[\(.*\)\]/\1/p' "$here/vulcanbench.toml" 2>/dev/null | tr -d '" ' | tr ',' ' ')
+for b in $blocked ultra; do
+  [ "$effort" = "$b" ] && { echo "run_gate: effort $effort is blocked (vulcanbench.toml [effort].blocked)" >&2; exit 2; }
+done
+case "$effort" in low|medium|high|xhigh|max) ;; *) echo "run_gate: GATE_EFFORT must be low, medium, high, xhigh or max (got $effort)" >&2; exit 2 ;; esac
 mkdir -p "$OUT/jobs"
 command -v harbor >/dev/null || { echo "run_gate: harbor not found (scripts/frontier-v5/setup-host.sh installs it)" >&2; exit 2; }
 
 case "$ref" in
-  astra)
-    agent=codex; model=gpt-6-astra; version=0.159.0
+  astra|sol62)
+    agent=codex
+    case "$ref" in astra) model=gpt-6-astra; version=0.159.0 ;; sol62) model=gpt-6.2-sol; version=0.166.0 ;; esac
     # A dedicated gate login (no connected apps) when it exists, else the
     # personal one; Harbor reads the file named by CODEX_AUTH_JSON_PATH.
     codex_auth="${GATE_CODEX_AUTH:-$HOME/.config/vulcanbench/codex-gate/auth.json}"
@@ -147,7 +167,7 @@ case "$ref" in
     [ -f "$envf" ] || { echo "run_gate: $envf missing (see the header for how to create it)" >&2; exit 2; }
     auth_args=(--env-file "$envf")
     if [ "${FABLE_AUTH:-oauth}" = api ]; then auth_env=(); else auth_env=(CLAUDE_FORCE_OAUTH=1); fi ;;
-  *) echo "run_gate: reference must be astra, fable or opus" >&2; exit 2 ;;
+  *) echo "run_gate: reference must be astra, sol62, fable or opus" >&2; exit 2 ;;
 esac
 
 # Exact error texts seen in agent logs (2026-10-17/18) plus Codex's usage-limit
@@ -171,10 +191,10 @@ stop_flag=""; spid=""
 write_status() { # phase [exit_code] [stop_reason] -> atomic rewrite of $status_file
   [ -n "$status_file" ] || return 0
   python3 - "$status_file" "$1" "${2:-}" "${3:-}" "$job" "$t" "$ref" "$agent" "$model" \
-    "$$" "$hpid" "$started_at" "$(git -C "$here" rev-parse --short HEAD 2>/dev/null)" "$OUT/jobs/$job" <<'PY'
+    "$$" "$hpid" "$started_at" "$(git -C "$here" rev-parse --short HEAD 2>/dev/null)" "$OUT/jobs/$job" "$effort" <<'PY'
 import glob, json, os, sys, time
 (path, phase, code, reason, job, task, ref, agent, model,
- pid, hpid, started, repo, job_dir) = sys.argv[1:15]
+ pid, hpid, started, repo, job_dir, effort) = sys.argv[1:16]
 solves = 0
 for p in glob.glob(job_dir + "/*__*/verifier/reward.json"):
     try:
@@ -183,7 +203,7 @@ for p in glob.glob(job_dir + "/*__*/verifier/reward.json"):
         pass
 d = {
     "job": job, "task": task, "ref": ref, "agent": agent, "model": model,
-    "effort": "medium", "pid": int(pid), "harbor_pid": int(hpid) if hpid else None,
+    "effort": effort, "pid": int(pid), "harbor_pid": int(hpid) if hpid else None,
     "phase": phase, "solves": solves, "started_at": started,
     "updated_at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
     "exit_code": int(code) if code else None, "stop_reason": reason or None,
@@ -363,7 +383,7 @@ for t in "$@"; do
   lang=$(sed -n 's/^vulcanbench_language = "\(.*\)"/\1/p' "$task/task.toml")
   case "$lang" in python|javascript) n=2 ;; *) n=1 ;; esac
   case "${GATE_CONCURRENCY:-}" in "") ;; 1|2) n=$GATE_CONCURRENCY ;; *) echo "run_gate: GATE_CONCURRENCY must be 1 or 2" >&2; exit 2 ;; esac
-  job="$ref-$t$suffix"
+  if [ "$effort" = medium ]; then job="$ref-$t$suffix"; else job="$ref-$effort-$t$suffix"; fi
   [ -e "$OUT/jobs/$job" ] && { echo "run_gate: $OUT/jobs/$job exists; move it aside first" >&2; exit 2; }
   status_file="$OUT/$job.status.json"; hpid=""; hcode=""; started_at=$(date -u '+%Y-%m-%dT%H:%M:%SZ')
   write_status preflight
@@ -372,7 +392,7 @@ for t in "$@"; do
     echo "!!! $t: stop requested (SIG$stop_flag) before harbor started"
     write_status stopped 130 "signal-$stop_flag"; exit 130
   fi
-  echo "=== $t $(date '+%F %H:%M:%S') ref=$ref agent=$agent model=$model version=$version effort=medium attempts=$attempts concurrency=$n harbor=$(harbor --version 2>/dev/null) repo=$(git -C "$here" rev-parse --short HEAD)"
+  echo "=== $t $(date '+%F %H:%M:%S') ref=$ref agent=$agent model=$model version=$version effort=$effort attempts=$attempts concurrency=$n harbor=$(harbor --version 2>/dev/null) repo=$(git -C "$here" rev-parse --short HEAD)"
   [ "$early_exit" = 0 ] && echo "=== early exit off (GATE_EARLY_EXIT=0): every attempt runs to the end"
   # A background list runs with SIGINT ignored (bash 3.2 has no `trap - INT`
   # that survives the fork), so harbor is exec'd through a python one-liner
@@ -380,7 +400,7 @@ for t in "$@"; do
   (cd "$here" && exec python3 -c 'import os, signal, sys
 signal.signal(signal.SIGINT, signal.SIG_DFL)
 os.execvp(sys.argv[1], sys.argv[1:])' \
-     env "${auth_env[@]+"${auth_env[@]}"}" harbor run -p "$task" -a "$agent" -m "$model" --effort medium \
+     env "${auth_env[@]+"${auth_env[@]}"}" harbor run -p "$task" -a "$agent" -m "$model" --effort "$effort" \
      --ak version="$version" --ak disable_web_search=true -k "$attempts" -n "$n" "${auth_args[@]+"${auth_args[@]}"}" \
      -o "$OUT/jobs" --job-name "$job" -y -q) > "$OUT/$job.log" 2>&1 &
   hpid=$!

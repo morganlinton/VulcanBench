@@ -16,9 +16,10 @@ cell exists; the pilot fixes the numbers.
 ## What Harbor 0.24.0 does at an agent timeout
 
 Read from the installed Harbor 0.24.0 source (`harbor/trial/single_step.py`,
-`trial.py`, `environments/docker/docker.py`). A smoke run on the pilot
-environment with Harbor's oracle and nop agents is pending until the pilot
-environment exists.
+`trial.py`, `environments/docker/docker.py`), and confirmed on 2026-11-21
+on the CLI11 pilot with Harbor's oracle agent: points 2, 3 and 5 below
+were seen directly (a 3-second budget on an oracle that sleeps first;
+the exec'd process surviving a killed `docker exec` client).
 
 1. The agent phase runs under `asyncio.wait_for(timeout=agent timeout)`. The
    agent timeout is the task's `[agent] timeout_sec`, or the job's
@@ -130,7 +131,10 @@ scripts/frontier-v5/grid_board.py --grid tasks/frontier-v5/grid.json --out board
 
 `grid_items.py` checks each trial's `items.json` against the grid brief's
 schema and against `reward.json` (reward = items done / items total;
-`items_done` and `items_total` match; a failed tamper scan scores 0 items).
+`items_done` and `items_total` match; a failed tamper scan scores 0 items;
+every `reward.json` value is a finite number, since Harbor fails the trial
+with `VerifierOutputParseError` on anything else, and after a budget stop
+that error is hidden behind `AgentTimeoutError` in `result.json`).
 A trial that disagrees is not scored and the import exits 1. How a broken
 guard is charged is the verifier's to apply (by clearing `done`); the
 engine reports the failed guards beside the count.

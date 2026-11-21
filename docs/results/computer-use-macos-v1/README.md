@@ -281,10 +281,10 @@ and date misses above were all counted for that reason.
 
 ## Next
 
-- A fourth row, GPT-6.2 Sol in Codex (owner request), at the same three
-  attempts per task. GPT-6.2 Sol is served only to a newer Codex release
-  (0.170.0), so it is a new reference row with its own pin, and its
-  results will be a separate note.
+- A fourth row, GPT-6.2 Sol in Codex (owner request), has run at the same
+  three attempts per task, on its own Codex pin (0.170.0). Its results,
+  and a finding about agents using the Mac's own Terminal that applies to
+  every row, are in [gpt-6.2-sol.md](gpt-6.2-sol.md).
 - Engine: rebuild every image with the keychain fix; find out why the
   MCP server sometimes misses Codex's startup (it now logs its startup to
   each trial's artifacts); a free-space check before a trial starts is in

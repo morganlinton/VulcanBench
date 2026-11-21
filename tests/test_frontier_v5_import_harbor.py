@@ -491,6 +491,17 @@ def test_verifier_problems_are_unscored_and_fail_the_import(tmp_path: Path, caps
     assert "verifier problems" in capsys.readouterr().err
 
 
+def test_a_verifier_output_harbor_rejected_is_unscored(tmp_path: Path) -> None:
+    job = make_job(
+        tmp_path / "jobs", JOB, "codex", "gpt-6.2-sol", exception="VerifierOutputParseError"
+    )
+    out = tmp_path / "out"
+    assert ih.main([str(job), "--out", str(out)]) == 1
+    r = run_json(out, job)
+    assert not r["scored"] and r["items_done"] is None
+    assert r["problems"] == ["Harbor VerifierOutputParseError: the verifier's output was rejected"]
+
+
 def test_claude_session_stopped_at_the_budget_is_priced_from_its_messages(tmp_path: Path) -> None:
     job = make_job(
         tmp_path / "jobs",
@@ -561,10 +572,13 @@ def test_infra_jobs_are_skipped_unless_asked(tmp_path: Path, capsys) -> None:
     assert "job set aside as INFRA" in run_json(out, job)["infra"]
 
 
-def test_ref_and_batch_of() -> None:
-    assert ih.ref_of(JOB, "max") == "sol62" and ih.batch_of(JOB) == 1
-    assert ih.ref_of("astra-medium-grid-b12", "medium") == "astra"
-    assert ih.ref_of("terra-max-grid-b3-rerun", "max") == "terra"
+def test_ref_effort_and_batch_of() -> None:
+    assert ih.ref_and_effort(JOB, "max") == ("sol62", "max") and ih.batch_of(JOB) == 1
+    assert ih.ref_and_effort("astra-medium-grid-b12", "medium") == ("astra", "medium")
+    assert ih.ref_and_effort("terra-max-grid-b3-rerun", "max") == ("terra", "max")
+    # Harbor's oracle and nop have no reasoning_effort: the job name gives it.
+    assert ih.ref_and_effort("oracle-max-grid-b1", None) == ("oracle", "max")
+    assert ih.ref_and_effort("odd", None) == ("odd", "medium")
     assert ih.batch_of("terra-max-grid-b3-rerun") == 3 and ih.batch_of("odd") is None
 
 

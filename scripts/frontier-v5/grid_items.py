@@ -15,7 +15,10 @@ in the trial's verifier directory (schema agreed in the grid brief,
      "guards": {"total": 120, "failed": ["<check id>", ...]}}
 
 and ``reward.json`` carries ``reward`` (items done over items total, a
-float), ``items_done`` and ``items_total``.
+float), ``items_done`` and ``items_total``. Every reward.json value must be
+a finite number: Harbor fails the trial on any other value
+(``VerifierOutputParseError``), so a string such as a policy name belongs in
+items.json.
 
 Rules (PLAN-v6 section 5): an item is done only when all of its held-out
 checks pass, so ``done`` with ``checks_passed < checks_total`` is malformed.
@@ -34,6 +37,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import math
 import re
 import sys
 from dataclasses import asdict, dataclass, field
@@ -165,6 +169,13 @@ def read_trial(trial: Path) -> TrialItems | None:
         t.problems.append("reward.json has no numeric reward")
         return t
     t.reward = float(reward)
+    for key, value in reward_doc.items():
+        # Harbor 0.24.0 fails the trial (VerifierOutputParseError) on any
+        # reward.json value that is not a finite number, strings included.
+        if not isinstance(value, (int, float)) or not math.isfinite(value):
+            t.problems.append(
+                f"reward.json {key}={value!r} is not a finite number (Harbor rejects it)"
+            )
     expect = t.items_done / t.items_total
     if abs(t.reward - expect) > TOLERANCE:
         t.problems.append(f"reward {t.reward} is not {t.items_done}/{t.items_total}")

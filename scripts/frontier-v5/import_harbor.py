@@ -32,8 +32,9 @@ the ``VULCANBENCH_INFRA:`` marker the dsh agent writes, an exception Harbor
 raises for the account or the model id (authentication, usage limit, model
 not found), a trial whose verifier never ran, or a job set aside as
 ``INFRA-*`` (skipped unless ``--include-infra``). A verifier that wrote no
-``items.json``, or one that disagrees with its reward, is recorded under
-``problems`` and not scored. Other exceptions are recorded (``exception``),
+``items.json``, one that disagrees with its reward, or one whose output
+Harbor rejected (``VerifierOutputParseError`` and the other reward-file
+errors) is recorded under ``problems`` and not scored. Other exceptions are recorded (``exception``),
 never hidden: reaching the budget is the normal end of a grid session. A
 session a provider safety classifier stopped is scored on what the agent
 wrote and disclosed (docs/DECISIONS.md 2026-09-24), with
@@ -108,6 +109,13 @@ INFRA_EXCEPTIONS = {
 }
 SAFETY_EXCEPTION = "AgentSafetyRefusalError"
 BUDGET_EXCEPTION = "AgentTimeoutError"
+#: Harbor rejected the verifier's output: a task defect, never scored.
+VERIFIER_EXCEPTIONS = {
+    "VerifierOutputParseError",
+    "RewardFileNotFoundError",
+    "RewardFileEmptyError",
+    "VerifierTimeoutError",
+}
 INFRA_MARK = "VULCANBENCH_INFRA:"
 SKIP_DIRS = {"__pycache__", "node_modules", "target", ".git"}
 
@@ -488,13 +496,21 @@ def task_from_trial(trial: Path) -> str | None:
     return None
 
 
-def ref_of(job: str, effort: str | None) -> str:
-    """The reference name from a run_gate.sh grid job name, <ref>-<effort>-grid-b<n>[suffix]."""
+EFFORTS = ("low", "medium", "high", "xhigh", "max")
+
+
+def ref_and_effort(job: str, effort: str | None) -> tuple[str, str]:
+    """(reference, effort) from a run_gate.sh grid job name, <ref>-<effort>-grid-b<n>[suffix].
+
+    The agent's own ``reasoning_effort`` wins; an agent without one (Harbor's
+    oracle and nop) takes the level from the job name.
+    """
     cut = job.find("-grid-b")
     name = job[:cut] if cut > 0 else job.split("-", 1)[0]
-    if effort and name.endswith("-" + effort):
-        name = name[: -len(effort) - 1]
-    return name
+    ref, _, level = name.rpartition("-")
+    if ref and level in EFFORTS and (effort is None or effort == level):
+        return ref, level
+    return name, effort or "medium"
 
 
 def batch_of(job: str) -> int | None:
@@ -513,8 +529,8 @@ def import_trial(
     agent = "dsh" if "harbor_dsh_agent" in str(agent) else agent
     model = agent_cfg.get("model_name") or ""
     task = task_from_trial(trial) or ""
-    effort = kwargs.get("reasoning_effort")
     job = job_cfg.get("job_name") or trial.parent.name
+    ref, effort = ref_and_effort(job, kwargs.get("reasoning_effort"))
     agent_dir = trial / "agent"
     exc = (result.get("exception_info") or {}).get("exception_type")
 
@@ -539,6 +555,8 @@ def import_trial(
     if graded is None:
         infra.append("the verifier did not run")
     problems = list(graded.problems) if graded else []
+    if exc in VERIFIER_EXCEPTIONS:
+        problems.append(f"Harbor {exc}: the verifier's output was rejected")
 
     run_dir = out / job / trial.name
     run_dir.mkdir(parents=True, exist_ok=True)
@@ -572,7 +590,7 @@ def import_trial(
             )
             + "\n"
         )
-    ok = graded is not None and graded.consistent
+    ok = graded is not None and graded.consistent and not problems
 
     record = {
         "schema": SCHEMA,
@@ -581,12 +599,12 @@ def import_trial(
         "trial": trial.name,
         "task": task,
         "task_checksum": result.get("task_checksum"),
-        "ref": ref_of(job, effort),
+        "ref": ref,
         "batch": batch_of(job),
         "agent": agent,
         "agent_version": (result.get("agent_info") or {}).get("version") or kwargs.get("version"),
         "model": model,
-        "effort": effort or "medium",
+        "effort": effort,
         "concurrency": job_cfg.get("n_concurrent_trials"),
         "started_at": result.get("started_at"),
         "finished_at": result.get("finished_at"),

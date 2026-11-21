@@ -105,6 +105,10 @@ def test_tamper_flag_zeroes_the_environment(tmp_path: Path) -> None:
         ({"reward": 0.5, "items_done": 3, "items_total": 4}, "items_done=3"),
         ({"reward": 0.5, "items_done": 2}, "items_total=None"),
         ({"reward": True, "items_done": 2, "items_total": 4}, "no numeric reward"),
+        (
+            {"reward": 0.5, "items_done": 2, "items_total": 4, "guard_policy": "one_item_off"},
+            "guard_policy='one_item_off' is not a finite number (Harbor rejects it)",
+        ),
     ],
 )
 def test_reward_disagreements_are_inconsistent(tmp_path: Path, reward: Any, problem: str) -> None:

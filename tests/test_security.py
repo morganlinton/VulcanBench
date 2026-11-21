@@ -40,7 +40,8 @@ def test_security_no_source_files(tmp_path: Path) -> None:
 
 def test_security_python_missing_bandit(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     (tmp_path / "a.py").write_text("x = 1\n")
-    monkeypatch.setattr(security.shutil, "which", lambda name: None)
+    # Missing both on PATH and beside the interpreter (harness.tool_paths).
+    monkeypatch.setattr(security, "resolve_tool", lambda name: None)
     result = assess_security(tmp_path, ["a.py"])
     assert result.details["languages"]["python"]["reason"] == "bandit not on PATH"
 

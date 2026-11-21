@@ -56,6 +56,7 @@ def test_quality_unsupported_language_reports_reason(
 
 def test_quality_python_missing_ruff(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     (tmp_path / "a.py").write_text(_CLEAN)
-    monkeypatch.setattr(quality.shutil, "which", lambda name: None)
+    # Missing both on PATH and beside the interpreter (harness.tool_paths).
+    monkeypatch.setattr(quality, "resolve_tool", lambda name: None)
     result = assess_quality(tmp_path, ["a.py"])
     assert result.details["languages"]["python"]["reason"] == "ruff not on PATH"

@@ -65,6 +65,49 @@ def test_non_loopback_clients_are_refused(runner_env: Path) -> None:
     assert default.get("/api/runner/runs").status_code == 403
 
 
+@pytest.mark.parametrize(
+    "origin",
+    [
+        "https://evil.example",
+        "http://localhost.evil.example:8000",  # DNS rebinding lands on a foreign hostname
+        "http://127.0.0.1.nip.io:3000",
+        "null",
+        "file://",
+        "ftp://localhost",
+        "http://localhost:notaport",
+        "",
+    ],
+)
+def test_pages_not_on_localhost_are_refused(runner_env: Path, origin: str) -> None:
+    c = _local()
+    r = c.get("/api/runner/status", headers={"Origin": origin})
+    assert r.status_code == 403
+    assert "pages on localhost" in r.json()["detail"]
+    post = c.post("/api/runner/plans", json={"kind": "prepare"}, headers={"Origin": origin})
+    assert post.status_code == 403
+
+
+@pytest.mark.parametrize(
+    "origin",
+    [
+        None,
+        "http://localhost:3000",
+        "http://127.0.0.1:3000",
+        "http://127.0.0.1:53111",  # the Mac app's dashboard on a runtime port
+        "http://[::1]:3000",
+        "https://localhost",
+    ],
+)
+def test_pages_on_localhost_and_plain_clients_pass(runner_env: Path, origin: str | None) -> None:
+    headers = {"Origin": origin} if origin is not None else {}
+    assert _local().get("/api/runner/status", headers=headers).status_code == 200
+
+
+def test_origin_guard_leaves_the_public_api_alone(runner_env: Path) -> None:
+    r = _local().get("/api/health", headers={"Origin": "https://evil.example"})
+    assert r.status_code == 200
+
+
 def test_list_get_check_and_status(runner_env: Path) -> None:
     c = _local()
     status = c.get("/api/runner/status").json()
@@ -130,7 +173,7 @@ def test_options_and_plan_shape(launch_env: dict[str, Path]) -> None:
     c = _local()
     opts = c.get("/api/runner/options").json()
     assert opts["tags"] == ["bench/2026-10-29-test"] and opts["worktree"]["exists"] is True
-    assert opts["kinds"] == ["sweep", "prepare"]
+    assert opts["kinds"] == ["sweep", "prepare", "author", "validate"]
     for gone in ("refs", "tasks", "attempts", "concurrency", "gate_effort", "credentials"):
         assert gone not in opts
     plan = _plan(c)
@@ -255,7 +298,7 @@ def _sweep_plan(c: TestClient, **over: object) -> dict[str, Any]:
 
 def test_options_cover_the_model_sweep(launch_env: dict[str, Path]) -> None:
     opts = _local().get("/api/runner/options").json()
-    assert opts["kinds"] == ["sweep", "prepare"]
+    assert opts["kinds"] == ["sweep", "prepare", "author", "validate"]
     assert [s["id"] for s in opts["suites"]] == [SUITE_ID] and opts["suites"][0]["n_tasks"] == 2
     assert "ultra" not in opts["efforts"] and opts["efforts"][0] == "minimal"
     assert "codex" in opts["harnesses"] and opts["sandbox_defaults"]["codex"] == "local"
@@ -302,6 +345,10 @@ def test_sweep_plan_confirm_queue_and_progress(launch_env: dict[str, Path]) -> N
     assert prog["current"]["run_id_href"].startswith("harness:0:")
     run = c.get(f"/api/runner/runs/{prog['current']['run_id_href']}").json()
     assert run["owned"] is True and run["job"]["id"] == levels[0]["job"]["id"]
+    # Per-task summaries carry no source block: the level's job supplies the tag.
+    level_row = next(r for r in rows if r["id"] == f"job:{levels[0]['job']['id']}")
+    assert run["source_tag"] == level_row["source_tag"] and run["source_tag"].startswith("bench/")
+    assert run["source_commit"] == level_row["source_commit"] and run["source_commit"]
     # The job is queued, not running, so a trace without a summary is a stopped run.
     assert run["status"] == "stopped"
     # Removing a queued level and stopping the other.

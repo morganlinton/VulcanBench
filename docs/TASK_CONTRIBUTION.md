@@ -166,6 +166,39 @@ Never label a task with provenance you can't stand behind, the benchmark's value
 is its transparency.
 
 
+## Tasks from your own pull requests (the suite builder)
+
+The suite builder (`vulcanbench suite`, or the Suites pages of the local GUI,
+see [GUI.md](GUI.md#build-your-own-eval-suite-milestone-6)) makes tasks from
+merged pull requests in a repository you can read with `gh`. Those tasks live
+in your suites home (`[runner].suites_home`, default `~/vulcanbench-suites`),
+form a custom suite, and are never committed to this repository. They follow
+the same layout and validator as the tasks above, with these differences:
+
+- `suite task scaffold` writes `metadata.json` with `source: oss`,
+  `decontaminated: false`, an `upstream` block (pull request URL, base and
+  merge commits) and a `builder` block (repository, PR number, stage). The
+  base commit is the tree the fix applies to (a merge commit's first parent,
+  or the commit before a rebased PR's first commit); `repo/` is the
+  repository at that commit with the PR's own test files removed;
+  `gold_patch.diff` is the PR's non-test change.
+- One model session per task (`suite task author`) writes the final
+  `issue.md`, the hidden tests under `tests/` and `tests.fail_to_pass` /
+  `tests.pass_to_pass`. It runs in a scratch copy with network off; only
+  `issue.md`, `tests/`, `gold_patch.diff`, its notes, test-file deletions
+  under `repo/` and an allowlist of metadata keys are copied back, and every
+  other change is discarded and listed.
+- `suite validate --sandbox docker` runs the checks from
+  [Validate before opening a PR](#validate-before-opening-a-pr). Provenance
+  needs a LICENSE or NOTICE file in `repo/`. A private repository usually has
+  none: pass `--license-note TEXT` to `suite task scaffold` (the GUI's "Terms
+  note" field) to write the terms to `repo/NOTICE`.
+- Fill in `decontamination_notes` with when the task was checked against the
+  training cutoffs of the models you will run; the scaffold leaves a
+  placeholder that names the pull request.
+- `suite freeze` writes `suite.lock.json` with a hash per accepted task, and
+  every run of the suite checks the tasks against it before any model call.
+
 ## Multi-service environments (`metadata.environment`)
 
 A task that needs live services (databases, caches, load generators) ships a

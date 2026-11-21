@@ -20,6 +20,8 @@ class RunnerConfig:
     run_worktrees: Path
     extra_run_roots: tuple[Path, ...]
     first_check_after_s: int
+    #: Suites built outside the checkout: ``<suites_home>/<suite-id>/suite.lock.json``.
+    suites_home: Path
 
     @property
     def gate_jobs_dir(self) -> Path:
@@ -41,6 +43,7 @@ class RunnerConfig:
             "gate_out": str(self.gate_out),
             "run_worktrees": str(self.run_worktrees),
             "run_roots": [str(p) for p in self.run_roots],
+            "suites_home": str(self.suites_home),
             "first_check_after_s": self.first_check_after_s,
         }
 
@@ -83,4 +86,5 @@ def load_config(settings_path: Path = SETTINGS_PATH) -> RunnerConfig:
         run_worktrees=_path(_env("run_worktrees") or str(table["run_worktrees"])),
         extra_run_roots=tuple(_path(p) for p in extra),
         first_check_after_s=first,
+        suites_home=_path(_env("suites_home") or str(table["suites_home"])),
     )

@@ -3,10 +3,11 @@
 import Link from "next/link";
 import { useMemo } from "react";
 import {
+  builderTarget,
+  suiteLabel,
   fmtElapsed,
   fmtTime,
   isActive,
-  publicSuiteName,
   runHref,
   runnerGet,
   type RunRow,
@@ -32,8 +33,17 @@ function SourceCell({ run }: { run: RunRow }) {
   );
 }
 
+// A queued job carries no trials of its own: a sweep level's results are its
+// task rows, and prepare, author and validate jobs have no reward at all.
+function jobRewardsLabel(run: RunRow): string | undefined {
+  if (!run.id.startsWith("job:")) return undefined;
+  if (run.kind !== "suite") return "n/a";
+  return run.attempts_done > 0 ? "in the task rows" : undefined;
+}
+
 function Row({ run }: { run: RunRow }) {
-  const suite = publicSuiteName(run.suite_or_task);
+  const suite = suiteLabel(run);
+  const target = builderTarget(run);
   return (
     <tr className="hover:bg-white/5">
       <td className="p-3 align-top"><StatusBadge status={run.status} /></td>
@@ -42,20 +52,29 @@ function Row({ run }: { run: RunRow }) {
         <div className="text-xs text-zinc-500">{run.kind}{run.owned ? ", from the GUI" : ", external"}</div>
       </td>
       <td className="p-3 align-top">
-        <div className="text-zinc-200">{suite ?? run.suite_or_task ?? "n/a"}</div>
-        {suite && <div className="font-mono text-xs text-zinc-500">{run.suite_or_task}</div>}
+        {target ? (
+          <>
+            <Link href={`/suites/${encodeURIComponent(target.suite)}/tasks/${encodeURIComponent(target.task)}`} className="font-mono text-emerald-400 hover:underline">{target.task}</Link>
+            <div className="text-xs text-zinc-500">in {target.suiteName}</div>
+          </>
+        ) : (
+          <>
+            <div className="text-zinc-200">{suite ?? run.suite_or_task ?? "n/a"}</div>
+            {suite && <div className="font-mono text-xs text-zinc-500">{run.suite_or_task}</div>}
+          </>
+        )}
       </td>
       <td className="p-3 align-top font-mono text-xs text-zinc-300">{run.model ?? "n/a"}</td>
       <td className="p-3 align-top text-zinc-300">{run.harness ?? "n/a"}</td>
       <td className="p-3 align-top text-zinc-300">{run.effort ?? "n/a"}</td>
       <td className="p-3 align-top"><SourceCell run={run} /></td>
       <td className="p-3 align-top font-mono text-zinc-300">
-        {run.attempts_done}{run.attempts_total !== null ? ` of ${run.attempts_total}` : ""}
+        {run.id.startsWith("job:") && run.kind !== "suite" ? <span className="text-zinc-500">n/a</span> : <>{run.attempts_done}{run.attempts_total !== null ? ` of ${run.attempts_total}` : ""}</>}
         {run.solves !== null && run.solves > 0 && (
           <span className="ml-2 text-emerald-400">{run.solves} solved</span>
         )}
       </td>
-      <td className="p-3 align-top"><RewardDots trials={run.trials} /></td>
+      <td className="p-3 align-top"><RewardDots trials={run.trials} empty={jobRewardsLabel(run)} /></td>
       <td className="p-3 align-top font-mono text-zinc-300" title={`started ${fmtTime(run.started_at)}`}>
         {fmtElapsed(run.elapsed_s)}
       </td>
@@ -75,7 +94,7 @@ function Section({ title, runs, empty }: { title: string; runs: RunRow[]; empty:
           <table className="w-full text-sm">
             <thead className="bg-white/5 text-left">
               <tr>
-                {["Status", "Run", "Suite or task", "Model", "Harness", "Effort", "Source", "Attempts", "Rewards", "Elapsed", "First attempt"].map((h) => (
+                {["Status", "Run", "Eval suite or task", "Model", "Harness", "Effort", "Source", "Attempts", "Rewards", "Elapsed", "First attempt"].map((h) => (
                   <th key={h} className="p-3 font-normal text-zinc-400 whitespace-nowrap">{h}</th>
                 ))}
               </tr>

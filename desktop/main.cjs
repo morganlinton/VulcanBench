@@ -155,6 +155,11 @@ function buildMenu() {
           accelerator: "CmdOrCtrl+3",
           click: () => state.win && state.win.loadURL(dashboardUrl("/leaderboard")),
         },
+        {
+          label: "Suites",
+          accelerator: "CmdOrCtrl+4",
+          click: () => state.win && state.win.loadURL(dashboardUrl("/suites")),
+        },
         { type: "separator" },
         { role: "reload" },
         { role: "toggleDevTools" },

@@ -293,7 +293,8 @@ def test_sol62_at_max_effort_is_a_named_measurement(gate: Gate) -> None:
 def test_terra_runs_codex_0_159_0_with_the_gate_config(gate: Gate) -> None:
     # The launch lineup's Terra (R9) on its Frontier v4 pin, at its top level.
     r = gate.run("--refs")
-    assert json.loads(r.stdout.splitlines()[4]) == {
+    refs = {x["name"]: x for x in map(json.loads, r.stdout.splitlines())}
+    assert refs["terra"] == {
         "name": "terra",
         "agent": "codex",
         "model": "gpt-6.1-terra",
@@ -630,7 +631,7 @@ def test_fable52_is_refused_when_the_usage_window_is_full(gate: Gate) -> None:
     assert r.returncode == 2 and json.loads(r.stdout.strip())["model"] == "claude-fable-5-2"
 
 
-def test_terra_runs_codex_0_159_0_with_the_gate_config(gate: Gate) -> None:
+def test_terra_passes_the_codex_login_and_gate_config_to_harbor(gate: Gate) -> None:
     r = gate.run("terra", gate.task, GATE_EFFORT="max", GATE_EARLY_EXIT="0")
     assert r.returncode == 0, r.stdout + r.stderr
     argv, env = _argv(gate, f"terra-max-{gate.task}")

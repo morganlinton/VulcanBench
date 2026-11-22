@@ -10,9 +10,12 @@ worklist hard? A second pilot cell was built for the C, larger-tier slot on
 curl (about 149,000 lines of first-party C) and each model ran it once.
 These are calibration runs, not board entries.
 
-**The larger repo is harder, and it still does not separate the two
-models.** Each finished 22 of 27 items, and each was stopped at the 15 minute
-budget.
+**As scored, each model finished 22 of 27 items and was stopped at the 15
+minute budget. A trace of the misses then showed that three of the unfinished
+items fail on things their worklist entries do not say.** With those three
+checks set aside each model would have 25 of 27, the same place as the CLI11
+cell. The larger repo does not separate the two models, and most of its
+apparent headroom is a defect in the environment, not difficulty.
 
 ## Result
 
@@ -36,7 +39,8 @@ $11.89 for all eleven pilot runs.
   on the same held-out tests: three of them are one test short, and one
   fails both of its tests. Both models had edited the code for all four.
   Terra's fifth is another item one test short; Sol's fifth is the item the
-  guard charge cleared.
+  guard charge cleared. The trace below finds that three of the shared four
+  are not real misses.
 - By kind, both models: 20 of 25 defects, the 1 diagnosis item and the 1
   feature.
 - By the builder's difficulty rating (made before any run):
@@ -47,28 +51,59 @@ $11.89 for all eleven pilot runs.
 | Borderline | 8 | 7 | 7 |
 | Small | 6 | 5 (one cleared by the guard charge) | 6 |
 
+## Trace of the misses
+
+Two models failing the same held-out tests on the same four items can mean
+the behaviours are hard, or that the entries under-describe them. To tell,
+each model's collected tree was rebuilt in the verifier image, every failing
+test was rerun on its own, and each failure was read against the test, the
+worklist entry, the reference fix and the model's change. All failures
+reproduced. No model was called.
+
+| Unfinished item | Models | What the failing test wanted | Verdict |
+| --- | --- | --- | --- |
+| A | both | The exact wording of an error message. Both models returned the right error code with their own wording; the entry gives no wording. | Check defect |
+| B | both | An empty file left at a path after a failed write. Both models detected the failure and left nothing there; the reference leaves an empty file as a side effect of how it opens the target. The entry does not ask for one. | Check defect |
+| C | both | That a failed operation never calls the application's cleanup callback. Both models returned the required error; the entry does not mention callbacks, and the unfixed code calls them on other failures. | Entry under-described |
+| D | both | The behaviours the entry lists. GPT-6.2 Sol's change aborts with a memory error; GPT-6.1 Terra's change rejects an input the original code accepted. | Real miss |
+| E | Terra only | A behaviour the entry states. | Real miss |
+| Guard | Sol only | An existing, visible test that Sol's change broke. | Real regression; the charge is correct |
+
+- **Three of the four shared misses are the environment's fault.** Setting
+  those three checks aside, GPT-6.2 Sol would have 26 items passing and 25
+  after the guard charge, and GPT-6.1 Terra 25: 93% each. This is a
+  reading of the logs, not a rescore; the scored result stays 22 of 27.
+- **Two further weaknesses showed up on item D.** One of its held-out tests
+  is the repo's main existing regression test for that area, so with the
+  whole test held out the agent had nothing to tell it that it had broken
+  old behaviour. Another calls an internal function directly, which fixes
+  the internal design, not only the reported behaviour.
+- **The admission checks cannot catch this.** They show that the reference
+  passes the tests and that each test needs its fix. They do not show that
+  the entry is enough to pass the tests. A check of each held-out test's
+  assertions against its entry's text is owed for every environment.
+
 ## Reading the result
 
-- **A large repo moves the worklist off the ceiling.** With the same number
-  of items and the same budget, each model finished 81% here against 93%
-  and 96% on the 27-item CLI11 worklist, and most of the misses are items
-  rated hardest. This cell has headroom; the CLI11 cell does not.
-- **It does not rank GPT-6.2 Sol against GPT-6.1 Terra.** The counts are
-  equal and the unfinished items nearly identical. The two are also within
-  about one point of each other on the Frontier v4 board at their best
-  effort levels, so a tie may be
-  the right answer for this pair, not a failure to measure. A model further
-  away, weaker or stronger, is what would show whether the grid spreads a
-  field.
-- **Time or capability is not settled.** Both sessions were cut off at 15
-  minutes, so a longer budget might lift both. One run per model at one
-  budget cannot tell a time limit from a difficulty limit.
-- **The four shared misses need a review before this cell is used on a
-  board.** Two models failing the same held-out tests on the same four
-  items can mean those behaviours are hard, or that the worklist entries
-  leave them under-described. The entries read as complete to the operator,
-  but the failing tests have not yet been traced against each model's
-  changes.
+- **The larger repo is not off the ceiling for these two models.** The
+  scored 81% is mostly check defects; the corrected reading is 93%, where
+  the 27-item CLI11 worklist put them (93% and 96%).
+- **It does not rank GPT-6.2 Sol against GPT-6.1 Terra.** Scored and
+  corrected, the counts are equal. The two are also within about one point
+  of each other on the Frontier v4 board at their best effort levels, so a
+  tie may be the right answer for this pair, not a failure to measure. A
+  model further away, weaker or stronger, is what would show whether the
+  grid spreads a field.
+- **The large repo did change the work.** Both sessions ran to the budget,
+  which never happened on CLI11 at 15 minutes, and the real misses are of a
+  kind CLI11 did not produce: a memory error, and a regression in existing
+  behaviour.
+- **Time or capability is not settled.** Both sessions were cut off, so a
+  longer budget might lift both. One run per model at one budget cannot
+  tell a time limit from a difficulty limit.
+- **This cell must be repaired before it is used again.** Items A, B and C
+  need their entries or their checks changed, and item D's existing
+  regression test should stay visible to the agent.
 - **The format held on a much larger tree.** Grading the whole 1,798-test
   suite took about 2 minutes per run, the budget stop and the guard charge
   both worked on paid runs, and the images came up built so no budget was
@@ -112,6 +147,9 @@ $11.89 for all eleven pilot runs.
   among the 50 that are counted.
 - **The environment was built and validated a few hours before the runs,**
   by one session, and its admission checks were not repeated independently.
+  The defects the trace found were in it when the runs were made.
+- **The trace is one reader's judgment** of six failures, made after the
+  runs. The corrected count is not a score.
 - **Background load.** When run 10 started, a macOS background process
   unrelated to the benchmark was using about one of the machine's 12 cores.
   Each environment is allotted 4.

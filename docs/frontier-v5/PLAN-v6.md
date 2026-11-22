@@ -67,7 +67,10 @@ in their repos' worklists.
 
 Rules for items: each has a reference change and held-out checks; items are
 independent (each reference change alone passes exactly its own item, and
-all together pass all); the visible suite passes at base.
+all together pass all); the visible suite passes at base; the entry says
+everything its held-out checks assert, the agent keeps the tests that
+existed before each fix, and nothing in the tree gives a check away
+(section 6, checks 5 to 7).
 
 ## 4. A run
 
@@ -106,6 +109,37 @@ the grid.
 4. Ceiling check: if the strongest model at its top effort finishes every
    item inside the budget in the calibration run, items are added before
    the environment is admitted.
+5. Entry against assertions. Every held-out check is read against its
+   worklist entry. Each assertion on exact message or output text, on file
+   state, on an exact error code or exception type, or on an internal
+   symbol must be stated in the entry, or be something a competent fix
+   cannot avoid (it follows from behaviour the entry states, from the
+   repository's existing conventions, or from the test's own fixture).
+   Where neither holds, the entry is clarified or the verifier's copy of
+   the check is narrowed, and the change is recorded in the environment's
+   design record. Check 2 does not cover this: it shows that the checks
+   need the reference, not that the entry is enough to pass them.
+6. Visible guards for existing tests. A held-out test that existed before
+   its item's earliest fix stays in the agent's tree, in a version that
+   passes at base: the pin's test with the item's changes to it reversed
+   and any assertion the fix changes cut. The verifier still runs the
+   pin's version. Each visible version must pass at base and with the full
+   reference. A test stays fully held out only when every version of it
+   asserts what the fix changes. Tests the fix itself added stay held out.
+7. No leaked test data. Nothing in the agent's image gives away a held-out
+   check or describes an item as done: no held-out test or check name, no
+   data file or expected output of a held-out test, no comment left behind
+   by a removed test, and no changelog, README, book or example text that
+   describes an item's fix or feature as present. The check lists every
+   file each item's upstream change touched outside the graded source and
+   compares the agent's tree with it, then searches the whole image for
+   the check names and for the names a feature item adds.
+
+Checks 5 to 7 were added on 2026-11-22, after the second pilot cell's
+first runs: most of the items both models missed there failed on something
+the worklist entry did not say, and the agents had lost existing
+regression tests along with the new ones. They apply to every environment,
+the two pilot cells included.
 
 ## 7. What this supersedes
 

@@ -110,6 +110,31 @@ reproduced. No model was called.
   spent on a cold build. Each run produced 27 graded items in about 18
   minutes of wall-clock time for a little over $1.
 
+## After the repair (added later on November 22)
+
+The environment's builder then repaired it as version 0.2.0 and checked
+every held-out test's assertions against its entry. That work was pushed
+before all of its admission checks had been rerun, so the numbers below are
+provisional.
+
+- **A leak in the version the two runs used.** The agent's tree in 0.1.0
+  still held two data files containing the exact expected output of two
+  held-out tests, both belonging to one item. GPT-6.2 Sol's session log
+  refers to those files; GPT-6.1 Terra's does not. Both models finished
+  that item, and it is counted in both scores above. Version 0.2.0 removes
+  the files.
+- **More entries were short than the trace found.** The assertion check
+  found nine places where an entry did not state what its test requires,
+  item C among them. Each now has a sentence in the entry.
+- **The two defective checks were loosened**, one internal-design assertion
+  on item D was cut, and 16 held-out tests that existed before their fixes
+  now have a version in the agent's tree that passes on the unfixed code.
+- **Regrade of the two saved trees with the repaired checks: 24 of 27
+  each.** GPT-6.2 Sol has 25 passing less the guard charge. Item C still
+  fails for both, because the trees were written before its entry stated
+  the rule; that is where the trace's reading of 25 came from. A regrade is
+  information, not a score.
+
 ## Run conditions
 
 - Tag `bench/2026-11-21-frontier-v5-grid-pilot-calibration` (`d9305f64b`),
@@ -150,6 +175,9 @@ reproduced. No model was called.
   The defects the trace found were in it when the runs were made.
 - **The trace is one reader's judgment** of six failures, made after the
   runs. The corrected count is not a score.
+- **Expected output of two held-out tests was visible to the agents** in
+  the version both runs used, and one model's log refers to it (see "After
+  the repair"). One item in each score is affected.
 - **Background load.** When run 10 started, a macOS background process
   unrelated to the benchmark was using about one of the machine's 12 cores.
   Each environment is allotted 4.

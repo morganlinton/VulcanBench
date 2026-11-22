@@ -976,7 +976,7 @@ operational notes live here.
   and Grok 4.6 (Cursor pinned to 2026.10.01-e373342), the owner's choice on
   November 21. The Neon sweep finished on November 21 at 01:58 PST, so no
   sweep overlaps the window. Population: 92 rows (Neon has no Max). Judging
-  window 06:58 to 13:19 PST.
+  window 06:58 to 13:19 PST, then the recovery below.
 - Calibration: Muse passed with the one-gate allowance (g11 repeatability,
   shortfall 0.02); Grok passed all 20 gates.
 - Stop, Grok, probe submission-048 (neon low codeccore, 13:19 PST): neither
@@ -985,5 +985,26 @@ operational notes live here.
   misquoted under v3.7 and v3.17. No rule covered two malformed replies.
   `invalidate_unrecoverable_probe` was extended to accept them (owner decision
   in chat, see docs/DECISIONS.md), leaving "Extra data" errors to
-  `recover_trailing_braces`. The remaining Grok probes resume from a recovery
-  tag; the outcome is recorded with the results.
+  `recover_trailing_braces` (harness PR #328).
+- Recovery: from `bench/2026-11-21-gemini4-neon-judging-v332-recovery`
+  (e37c178ee), the Grok probe stage resumed 18:19 PST and finished 19:31 PST;
+  no sweep ran in between or during it. Submission-048 was marked invalid on
+  resume. The owner chose to leave it unpublished, which is what the frozen
+  summary does with a panel whose primary review stands but whose probe is
+  invalid (as v3.7 and v3.17 did on the same codeccore line), rather than
+  publish it from Muse alone.
+- Grok probe submission-069 (neon extra-high codeccore, 18:56 PST) failed the
+  same way: two malformed replies ("Expecting ',' delimiter") on the same
+  file. The extended rule marked it invalid and the stage went on; it is
+  unpublished on the same terms as submission-048.
+- The wrapper accepted 364 display renames (Cursor reports "Grok 4.6 Medium"
+  for the pinned `cursor-grok-4.6-medium`); four of those responses then
+  failed the frozen validator and were re-filed as that failure, so the
+  protocol's retry applied. Second attempts under the frozen rule: Muse 2
+  (both unsupported excerpts), Grok 7 (four unsupported excerpts, three JSON
+  syntax errors, two of them the invalid probes above). No quota stops.
+- Summary (19:31:29 PST, November 21): both panels passing, 90 of 92
+  published (submissions 048 and 069 unpublished), `ready_for_publication`
+  false because of those two, no reviewer fallback. Combined 84.32 (22
+  judged), 87.48, 87.87 and 87.70 (22 judged) from low to extra high; Code
+  quality 66.15, 67.87, 69.07 and 68.69.

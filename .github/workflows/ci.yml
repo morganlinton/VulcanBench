@@ -74,8 +74,15 @@ jobs:
           if [ "${{ github.event_name }}" != "pull_request" ]; then
             echo "validate=true" >> "$GITHUB_OUTPUT"; exit 0
           fi
-          files=$(gh pr diff "${{ github.event.pull_request.number }}" --repo "${{ github.repository }}" --name-only)
-          if echo "$files" | grep -qE '^(tasks/|harness/|sandbox/|scripts/validate_tasks\.py$|pyproject\.toml$|\.github/workflows/ci\.yml$)'; then
+          # Paginated file list (gh pr diff fails above 300 files). If GitHub cannot
+          # list them, or the PR is at the API's 3000-file limit, run the check.
+          if ! files=$(gh api --paginate "repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number }}/files" --jq '.[].filename'); then
+            echo "Could not list the PR's files; running the check."; echo "validate=true" >> "$GITHUB_OUTPUT"; exit 0
+          fi
+          if [ "$(printf '%s\n' "$files" | wc -l)" -ge 3000 ]; then
+            echo "validate=true" >> "$GITHUB_OUTPUT"; exit 0
+          fi
+          if grep -qE '^(tasks/|harness/|sandbox/|scripts/validate_tasks\.py$|pyproject\.toml$|\.github/workflows/ci\.yml$)' <<< "$files"; then
             echo "validate=true" >> "$GITHUB_OUTPUT"
           else
             echo "validate=false" >> "$GITHUB_OUTPUT"
@@ -127,8 +134,15 @@ jobs:
           if [ "${{ github.event_name }}" != "pull_request" ]; then
             echo "check=true" >> "$GITHUB_OUTPUT"; exit 0
           fi
-          files=$(gh pr diff "${{ github.event.pull_request.number }}" --repo "${{ github.repository }}" --name-only)
-          if echo "$files" | grep -qE '^(dashboard/|\.github/workflows/ci\.yml$)'; then
+          # Paginated file list (gh pr diff fails above 300 files). If GitHub cannot
+          # list them, or the PR is at the API's 3000-file limit, run the check.
+          if ! files=$(gh api --paginate "repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number }}/files" --jq '.[].filename'); then
+            echo "Could not list the PR's files; running the check."; echo "check=true" >> "$GITHUB_OUTPUT"; exit 0
+          fi
+          if [ "$(printf '%s\n' "$files" | wc -l)" -ge 3000 ]; then
+            echo "check=true" >> "$GITHUB_OUTPUT"; exit 0
+          fi
+          if grep -qE '^(dashboard/|\.github/workflows/ci\.yml$)' <<< "$files"; then
             echo "check=true" >> "$GITHUB_OUTPUT"
           else
             echo "check=false" >> "$GITHUB_OUTPUT"
@@ -168,8 +182,15 @@ jobs:
           if [ "${{ github.event_name }}" != "pull_request" ]; then
             echo "check=true" >> "$GITHUB_OUTPUT"; exit 0
           fi
-          files=$(gh pr diff "${{ github.event.pull_request.number }}" --repo "${{ github.repository }}" --name-only)
-          if echo "$files" | grep -qE '^(desktop/|\.github/workflows/ci\.yml$)'; then
+          # Paginated file list (gh pr diff fails above 300 files). If GitHub cannot
+          # list them, or the PR is at the API's 3000-file limit, run the check.
+          if ! files=$(gh api --paginate "repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number }}/files" --jq '.[].filename'); then
+            echo "Could not list the PR's files; running the check."; echo "check=true" >> "$GITHUB_OUTPUT"; exit 0
+          fi
+          if [ "$(printf '%s\n' "$files" | wc -l)" -ge 3000 ]; then
+            echo "check=true" >> "$GITHUB_OUTPUT"; exit 0
+          fi
+          if grep -qE '^(desktop/|\.github/workflows/ci\.yml$)' <<< "$files"; then
             echo "check=true" >> "$GITHUB_OUTPUT"
           else
             echo "check=false" >> "$GITHUB_OUTPUT"
@@ -194,10 +215,39 @@ jobs:
   docker-sandbox-build:
     runs-on: ubuntu-latest
     steps:
+      - name: Does this change touch the sandbox images?
+        # The Dockerfiles copy nothing from the rest of the repository, so the
+        # images can only change when sandbox/ or this workflow changes; other
+        # pull requests skip the build and the job reports success. Pushes to
+        # main always build.
+        id: sandbox
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if [ "${{ github.event_name }}" != "pull_request" ]; then
+            echo "check=true" >> "$GITHUB_OUTPUT"; exit 0
+          fi
+          # Paginated file list (gh pr diff fails above 300 files). If GitHub cannot
+          # list them, or the PR is at the API's 3000-file limit, run the check.
+          if ! files=$(gh api --paginate "repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number }}/files" --jq '.[].filename'); then
+            echo "Could not list the PR's files; running the check."; echo "check=true" >> "$GITHUB_OUTPUT"; exit 0
+          fi
+          if [ "$(printf '%s\n' "$files" | wc -l)" -ge 3000 ]; then
+            echo "check=true" >> "$GITHUB_OUTPUT"; exit 0
+          fi
+          if grep -qE '^(sandbox/|\.github/workflows/ci\.yml$)' <<< "$files"; then
+            echo "check=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "check=false" >> "$GITHUB_OUTPUT"
+            echo "No sandbox change in this PR; image build skipped."
+          fi
       - uses: actions/checkout@v4
+        if: steps.sandbox.outputs.check == 'true'
       - name: Build sandbox base image
+        if: steps.sandbox.outputs.check == 'true'
         run: docker build -t vulcanbench/sandbox:base -f sandbox/Dockerfile.base .
       - name: Smoke sandbox toolchains
+        if: steps.sandbox.outputs.check == 'true'
         # Use `sh -c`, not `sh -lc`: a login shell re-sources /etc/profile and
         # resets PATH, dropping the image's /usr/local/go/bin (Go lives there).
         run: |
@@ -211,8 +261,10 @@ jobs:
             node --version
           '
       - name: Build Rust sandbox image
+        if: steps.sandbox.outputs.check == 'true'
         run: docker build -t vulcanbench/sandbox:rust -f sandbox/Dockerfile.rust .
       - name: Smoke Rust sandbox toolchains
+        if: steps.sandbox.outputs.check == 'true'
         # `sh -c` for the same reason as above: the cargo toolchain lives on
         # /usr/local/cargo/bin, which a login shell would drop from PATH.
         run: |

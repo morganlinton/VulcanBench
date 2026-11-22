@@ -116,18 +116,41 @@ jobs:
   dashboard-lint-build:
     runs-on: ubuntu-latest
     steps:
+      - name: Does this change touch the dashboard?
+        # The dashboard (dashboard/, the local GUI) only needs checking when it
+        # or this workflow changes, so other pull requests skip the steps below
+        # and the job reports success. Pushes to main always check it.
+        id: dashboard
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if [ "${{ github.event_name }}" != "pull_request" ]; then
+            echo "check=true" >> "$GITHUB_OUTPUT"; exit 0
+          fi
+          files=$(gh pr diff "${{ github.event.pull_request.number }}" --repo "${{ github.repository }}" --name-only)
+          if echo "$files" | grep -qE '^(dashboard/|\.github/workflows/ci\.yml$)'; then
+            echo "check=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "check=false" >> "$GITHUB_OUTPUT"
+            echo "No dashboard change in this PR; dashboard lint and build skipped."
+          fi
       - uses: actions/checkout@v4
+        if: steps.dashboard.outputs.check == 'true'
       - name: Set up Node 22
+        if: steps.dashboard.outputs.check == 'true'
         uses: actions/setup-node@v4
         with:
           node-version: "22"
           cache: 'npm'
           cache-dependency-path: dashboard/package-lock.json
       - name: Install dashboard deps
+        if: steps.dashboard.outputs.check == 'true'
         run: cd dashboard && npm ci
       - name: Lint dashboard
+        if: steps.dashboard.outputs.check == 'true'
         run: cd dashboard && npm run lint
       - name: Build dashboard
+        if: steps.dashboard.outputs.check == 'true'
         run: cd dashboard && npm run build
 
   desktop-test:
@@ -135,16 +158,37 @@ jobs:
     # is not needed for them, so its download is skipped.
     runs-on: ubuntu-latest
     steps:
+      - name: Does this change touch the Mac app?
+        # Same rule as the dashboard: only when desktop/ or this workflow
+        # changes on a pull request; pushes to main always test it.
+        id: desktop
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if [ "${{ github.event_name }}" != "pull_request" ]; then
+            echo "check=true" >> "$GITHUB_OUTPUT"; exit 0
+          fi
+          files=$(gh pr diff "${{ github.event.pull_request.number }}" --repo "${{ github.repository }}" --name-only)
+          if echo "$files" | grep -qE '^(desktop/|\.github/workflows/ci\.yml$)'; then
+            echo "check=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "check=false" >> "$GITHUB_OUTPUT"
+            echo "No Mac app change in this PR; desktop tests skipped."
+          fi
       - uses: actions/checkout@v4
+        if: steps.desktop.outputs.check == 'true'
       - name: Set up Node 22
+        if: steps.desktop.outputs.check == 'true'
         uses: actions/setup-node@v4
         with:
           node-version: "22"
           cache: 'npm'
           cache-dependency-path: desktop/package-lock.json
       - name: Install desktop deps (no Electron download)
+        if: steps.desktop.outputs.check == 'true'
         run: cd desktop && ELECTRON_SKIP_BINARY_DOWNLOAD=1 npm ci --no-audit --no-fund
       - name: Test desktop helpers
+        if: steps.desktop.outputs.check == 'true'
         run: cd desktop && npm test
 
   docker-sandbox-build:

@@ -111,8 +111,8 @@ The first runs every batch in order; the second is a calibration run of
 batch 1 at a 30-minute budget (the status file records `budget_source:
 override`). Give each calibration budget its own `GATE_JOB_SUFFIX` (for
 example `-30m`) so its job directory does not collide with another
-budget's. References: astra, sol62 and terra (Codex), fable and opus
-(Claude Code); `--refs` lists them with their CLI pins. Each batch is one Harbor job, `<ref>-<effort>-grid-b<n>`, with
+budget's. References: astra, sol62 and terra (Codex), fable, fable52 and
+opus (Claude Code), dsflash (dsh); `--refs` lists them with their CLI pins. Each batch is one Harbor job, `<ref>-<effort>-grid-b<n>`, with
 one attempt per environment and all of them concurrent. Authentication, the
 web-tools-off settings, the Claude usage pre-flight, signals and the
 infrastructure guard are the gate runner's; an infrastructure failure in

@@ -504,8 +504,10 @@ if [ "$grid" = 1 ]; then
   done
   budget_args=()
   [ -n "${GATE_BUDGET_MIN:-}" ] && budget_args=(--budget-min "$GATE_BUDGET_MIN")
+  # Batch numbers go before the options: on Python 3.9 to 3.11 argparse
+  # rejects a positional that follows an option ("unrecognized arguments").
   plan=$(python3 "$here/scripts/frontier-v5/grid_plan.py" "$grid_file" "$tasks_dir" \
-    "${budget_args[@]+"${budget_args[@]}"}" "$@") || exit 2
+    "$@" "${budget_args[@]+"${budget_args[@]}"}") || exit 2
   note=$(python3 "$here/scripts/frontier-v5/grid_plan.py" "$grid_file" "$tasks_dir" \
     "${budget_args[@]+"${budget_args[@]}"}" --instruction) || exit 2
   note_args=()

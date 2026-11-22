@@ -260,3 +260,25 @@ def test_grid_plan_runs_on_the_hosts_system_python(tmp_path: Path) -> None:
     )
     assert r.returncode == 0, r.stderr
     assert r.stdout.split("\t")[:3] == ["1", "1200", "grid"]
+
+
+@pytest.mark.skipif(not Path("/usr/bin/python3").exists(), reason="no system python3")
+@pytest.mark.parametrize("order", ["batch_last", "batch_first"])
+def test_grid_plan_takes_a_batch_with_a_budget_on_the_system_python(
+    tmp_path: Path, order: str
+) -> None:
+    # The pilot's first launch: `run_gate.sh --grid sol62 1` with
+    # GATE_BUDGET_MIN set passed the batch number after --budget-min, which
+    # argparse on Python 3.9 to 3.11 rejects under plain parse_args.
+    grid_env(tmp_path, "a-grid")
+    grid_env(tmp_path, "b-grid")
+    g = grid_file(tmp_path)
+    tail = ["--budget-min", "15", "1"] if order == "batch_last" else ["1", "--budget-min", "15"]
+    r = subprocess.run(
+        ["/usr/bin/python3", str(HERE / "grid_plan.py"), str(g), str(tmp_path), *tail],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    assert r.returncode == 0, r.stderr
+    assert r.stdout.split("\t")[:3] == ["1", "900", "override"]

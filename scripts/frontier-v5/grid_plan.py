@@ -218,7 +218,9 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("batches", nargs="*", type=int)
     ap.add_argument("--budget-min", type=float, default=None)
     ap.add_argument("--instruction", action="store_true")
-    args = ap.parse_args(argv)
+    # Intermixed parsing: batch numbers may follow an option. Plain
+    # parse_args rejects that on Python 3.9 to 3.11 (the host's python3).
+    args = ap.parse_intermixed_args(argv)
     try:
         if args.budget_min is not None and args.budget_min <= 0:
             raise GridError("--budget-min must be positive")

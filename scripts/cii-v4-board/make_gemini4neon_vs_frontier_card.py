@@ -54,6 +54,9 @@ STEM = "gemini4neon-vs-frontier"
 MODELS = ("neon", "opus55", "gpt62sol")
 NEON_LEVELS = ("low", "medium", "high", "extra-high")
 BOARD_NAMES = {"opus55": "Opus 5.5", "gpt62sol": "GPT-6.2 Sol"}
+# The board's passed_of counts judged runs, not runs, so run counts come from each
+# model's published evidence bundle beside the board CSV.
+BUNDLES = {"opus55": "swe-v4-opus55-v315", "gpt62sol": "swe-v4-gpt62-sol-v331"}
 NAMES = {"neon": "Gemini 4 Neon", "opus55": "Claude Opus 5.5", "gpt62sol": "GPT-6.2 Sol"}
 # Neon is the board's Google purple; Anthropic clay and OpenAI green as on every card.
 # Markers and direct labels carry identity as well as color.
@@ -76,6 +79,11 @@ def levels(m):
 def load_groups(judging: Path, board: Path):
     """Per-level aggregates: Opus 5.5 and Sol from the published board, Neon from v3.32."""
     groups = {}
+    runs_per_level = {}
+    for m, bundle in BUNDLES.items():
+        rows = json.loads((board.parent / bundle / "runs.json").read_text())["rows"]
+        for e in LEVELS:
+            runs_per_level[m, e] = sum(r["effort"] == e for r in rows)
     with board.open() as fh:
         for r in csv.DictReader(fh):
             for m, name in BOARD_NAMES.items():
@@ -84,7 +92,7 @@ def load_groups(judging: Path, board: Path):
                 require((m, r["effort"]) not in groups, f"duplicate row {name} {r['effort']}")
                 require(r["mean_usd"] != "", f"{name} {r['effort']} has no price")
                 groups[m, r["effort"]] = {
-                    "n": int(r["passed_of"]),
+                    "n": runs_per_level[m, r["effort"]],
                     "combined": {
                         "n": int(r["n"]),
                         "mean": float(r["combined_33"]),
@@ -287,18 +295,16 @@ def main():  # noqa: PLR0915, one linear figure
         if groups[m, e]["combined"]["n"] < groups[m, e]["n"]
     ]
     require(
-        [(m, e) for m, e, _ in fewer_runs] == [("opus55", "high")]
-        and [(m, e) for m, e, _, _ in fewer_judged] == [("neon", "low"), ("neon", "extra-high")],
+        fewer_runs == []
+        and [(m, e, n) for m, e, n, _ in fewer_judged]
+        == [("neon", "low", 22), ("neon", "extra-high", 22), ("opus55", "high", 22)],
         "run or judged counts changed; reword the footnote",
     )
-    short = {"neon": "Neon", "opus55": "Opus 5.5", "gpt62sol": "Sol"}
-    label = lambda m, e: f"{short[m]} {e.replace('-', ' ').capitalize()}"  # noqa: E731
-    (rm, re_, rn) = fewer_runs[0]
     text(
         left,
         8.45,
-        f"23 runs per point ({label(rm, re_)}: {rn}); Neon has no Max. Neon Low and Extra "
-        "high judged on 22 of 23. Judges: Muse Spark 1.3 and Grok 4.6. "
+        "23 runs per point; Neon has no Max. Judged on 22 of 23: Neon Low and Extra high, "
+        "Opus 5.5 High. Judges: Muse Spark 1.3 and Grok 4.6. "
         "Cost is API-equivalent at list price. Harnesses differ.",
         11,
         color=MUTED,

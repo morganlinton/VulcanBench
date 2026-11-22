@@ -6,8 +6,9 @@ level, and one footnote that keeps judged run counts, pass counts, the judge pan
 the cost basis visible. The per-level table, minutes included, is written to the CSV
 beside the card.
 
-Antigravity offers Neon at Low, Medium, High and Extra high only (no Max), so Neon's
-line stops one column early and the footnote says so.
+Antigravity offers Neon at Low, Medium, High and Extra high only (no Max), so the card
+shows those four levels for every model and leaves the Opus 5.5 and Sol Max points out
+(owner request 2026-11-22); the footnote says so.
 
 Sources, nothing re-run or re-judged:
 
@@ -53,6 +54,8 @@ SPEC = "agy:gemini-4-neon"
 STEM = "gemini4neon-vs-frontier"
 MODELS = ("neon", "opus55", "gpt62sol")
 NEON_LEVELS = ("low", "medium", "high", "extra-high")
+# Neon has no Max, so the card leaves Max out for every model and compares like with like.
+SHOWN = NEON_LEVELS
 BOARD_NAMES = {"opus55": "Opus 5.5", "gpt62sol": "GPT-6.2 Sol"}
 # The board's passed_of counts judged runs, not runs, so run counts come from each
 # model's published evidence bundle beside the board CSV.
@@ -72,8 +75,9 @@ def require(condition, message):
         raise SystemExit(f"Card refused: {message}")
 
 
-def levels(m):
-    return NEON_LEVELS if m == "neon" else LEVELS
+def levels(_m):
+    """Every model is drawn at the four levels all three share (owner request 2026-11-22)."""
+    return SHOWN
 
 
 def load_groups(judging: Path, board: Path):
@@ -218,7 +222,7 @@ def main():  # noqa: PLR0915, one linear figure
         ax.tick_params(axis="y", length=0, labelsize=11, pad=6)
         ax.grid(axis="y", color=RULE, linewidth=0.5)
         ax.set_axisbelow(True)
-        ax.set_xticks(range(len(LEVELS)), [e.replace("-", " ").capitalize() for e in LEVELS])
+        ax.set_xticks(range(len(SHOWN)), [e.replace("-", " ").capitalize() for e in SHOWN])
         return ax
 
     plot_h = 3.9
@@ -228,12 +232,12 @@ def main():  # noqa: PLR0915, one linear figure
     lo = math.floor(min(v["mean"] - v["se"] for v in vals)) - 1
     hi = math.ceil(max(v["mean"] + v["se"] for v in vals)) + 1
     ax = axis(0.085, 0.40, 3.7, plot_h)
-    ax.set_xlim(-0.35, len(LEVELS) - 0.65)
+    ax.set_xlim(-0.35, len(SHOWN) - 0.65)
     ax.set_ylim(lo, hi)
     ax.set_yticks(range(lo + lo % 2, hi + 1, 2) if hi - lo <= 16 else range(lo, hi + 1, 5))
     dodge = {"neon": 0.0, "opus55": -0.06, "gpt62sol": 0.06}
     for m in MODELS:
-        xs = [LEVELS.index(e) + dodge[m] for e in levels(m)]
+        xs = [SHOWN.index(e) + dodge[m] for e in levels(m)]
         ys = [groups[m, e]["combined"]["mean"] for e in levels(m)]
         es = [groups[m, e]["combined"]["se"] for e in levels(m)]
         ax.plot(xs, ys, color=COLORS[m], lw=2.2, zorder=2)
@@ -260,7 +264,7 @@ def main():  # noqa: PLR0915, one linear figure
     ax.set_ylim(0, top * 1.15)
     ax.yaxis.set_major_formatter(lambda v, _pos: f"${v:.0f}")
     for m in MODELS:
-        idx = [LEVELS.index(e) for e in levels(m)]
+        idx = [SHOWN.index(e) for e in levels(m)]
         ys = [groups[m, e]["usd"]["mean"] for e in levels(m)]
         ax.bar(
             [i + shifts[m] for i in idx],
@@ -303,7 +307,7 @@ def main():  # noqa: PLR0915, one linear figure
     text(
         left,
         8.45,
-        "23 runs per point; Neon has no Max. Judged on 22 of 23: Neon Low and Extra high, "
+        "23 runs per point; Max left out (Neon has none). Judged on 22 of 23: Neon Low and Extra high, "
         "Opus 5.5 High. Judges: Muse Spark 1.3 and Grok 4.6. "
         "Cost is API-equivalent at list price. Harnesses differ.",
         11,

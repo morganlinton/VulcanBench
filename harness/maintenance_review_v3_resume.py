@@ -1177,7 +1177,7 @@ def recover_escaped_excerpts(folder: Path, panel: str, stage: str) -> bool:  # n
     return False
 
 
-def invalidate_unrecoverable_probe(folder: Path, panel: str, stage: str) -> bool:  # noqa: PLR0911, one return per precondition
+def invalidate_unrecoverable_probe(folder: Path, panel: str, stage: str) -> bool:  # noqa: PLR0911, PLR0912, one return per precondition
     """Both probe attempts failed only on an excerpt that no recovery rule accepts.
 
     A quote with a token added, changed, or invented is a fabrication under the
@@ -1186,6 +1186,10 @@ def invalidate_unrecoverable_probe(folder: Path, panel: str, stage: str) -> bool
     left unpublished (its L1 review stands but no score is published for it).
     The wrapper records the finding in the call folder and the remaining probes
     continue; nothing about the judgment is altered or filled in.
+
+    Added 2026-11-21 (v3.32, Grok probe submission-048, owner decision in chat):
+    both attempts may instead be replies that are not valid JSON at all, as long
+    as neither error is "Extra data", which recover_trailing_braces handles.
     """
     if stage != "probe" or (folder / INVALID_MARKER).exists():
         return False
@@ -1198,12 +1202,14 @@ def invalidate_unrecoverable_probe(folder: Path, panel: str, stage: str) -> bool
     # invented quote). At least one attempt must be the excerpt case.
     if not all(e == EXCERPT_ERROR or e.startswith(JSON_SYNTAX_ERRORS) for e in errors):
         return False
-    if EXCERPT_ERROR not in errors:
-        return False
-    evidence = payload_for(stage, folder.name, folder.parent.parent.name)
-    if evidence is None:
-        return False
-    source = list(v3.strings(evidence))
+    if EXCERPT_ERROR not in errors and any(e.startswith("Extra data") for e in errors):
+        return False  # left to recover_trailing_braces
+    source: list[str] = []
+    if EXCERPT_ERROR in errors:
+        evidence = payload_for(stage, folder.name, folder.parent.parent.name)
+        if evidence is None:
+            return False
+        source = list(v3.strings(evidence))
     unsupported = {}
     malformed = {}
     for attempt in (1, 2):
@@ -1225,13 +1231,19 @@ def invalidate_unrecoverable_probe(folder: Path, panel: str, stage: str) -> bool
         if not bad:
             return False  # recoverable after all; leave it to recover_excerpts
         unsupported[str(attempt)] = bad
+    if not unsupported:
+        finding = "No valid probe response: neither attempt was valid JSON."
+    else:
+        finding = (
+            "No valid probe response: "
+            + ("both attempts" if not malformed else "one attempt")
+            + " quoted an excerpt absent from the evidence that no recovery rule accepts "
+            "(a token added, changed, or invented)"
+            + (", and the other was not valid JSON." if malformed else ".")
+        )
     rec = {
         "at": datetime.now(UTC).isoformat(),
-        "finding": "No valid probe response: "
-        + ("both attempts" if not malformed else "one attempt")
-        + " quoted an excerpt absent from the evidence that no recovery rule accepts "
-        "(a token added, changed, or invented)"
-        + (", and the other was not valid JSON." if malformed else "."),
+        "finding": finding,
         "malformed_attempts": malformed,
         "action": "Probe invalid; no match call is made. The frozen summary leaves the "
         "submission unpublished for this panel. Remaining probes continue.",

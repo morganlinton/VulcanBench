@@ -34,9 +34,12 @@ jobs:
           toolchain: "1.87.0"
           components: clippy, rustfmt
       - name: Install cargo-audit
-        # --locked honors cargo-audit's shipped Cargo.lock so transitive deps
-        # can't drift to versions that no longer compile on the pinned toolchain.
-        run: cargo install cargo-audit --version 0.21.2 --locked
+        # A prebuilt release binary (the same pinned version) instead of
+        # `cargo install`, which compiled it from source for about 2 minutes
+        # on every run.
+        uses: taiki-e/install-action@v2
+        with:
+          tool: cargo-audit@0.21.2
       - name: Set up Java (for Java analyzer smoke + future tasks)
         uses: actions/setup-java@v4
         with:
@@ -55,8 +58,31 @@ jobs:
       - name: Mypy typecheck
         run: mypy harness backend alembic/env.py scripts/ingest_runs.py
       - name: Pytest (fast, no Docker)
-        run: pytest -m "not slow and not docker" --cov=harness --cov-fail-under=80
+        # -n auto spreads the tests over every core on the runner (pytest-xdist);
+        # pytest-cov combines the workers' coverage before the 80% gate.
+        run: pytest -n auto -m "not slow and not docker" --cov=harness --cov-fail-under=80
+      - name: Does this change touch task grading?
+        # Task validation re-grades every tasks/v1 task (about 4.5 minutes). It
+        # can only change when the tasks or the code that grades them change,
+        # so pull requests that touch neither (results, docs, scripts) skip it.
+        # The Validate Tasks workflow also covers tasks/ changes. Pushes to main
+        # always validate.
+        id: grading
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if [ "${{ github.event_name }}" != "pull_request" ]; then
+            echo "validate=true" >> "$GITHUB_OUTPUT"; exit 0
+          fi
+          files=$(gh pr diff "${{ github.event.pull_request.number }}" --repo "${{ github.repository }}" --name-only)
+          if echo "$files" | grep -qE '^(tasks/|harness/|sandbox/|scripts/validate_tasks\.py$|pyproject\.toml$|\.github/workflows/ci\.yml$)'; then
+            echo "validate=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "validate=false" >> "$GITHUB_OUTPUT"
+            echo "No task or grading change in this PR; task validation skipped."
+          fi
       - name: Validate tasks (gold patches solve, fail-to-pass real, deterministic)
+        if: steps.grading.outputs.validate == 'true'
         run: python scripts/validate_tasks.py tasks/v1
 
   python-3-14-smoke:
@@ -85,7 +111,7 @@ jobs:
       - name: CLI imports and starts
         run: vulcanbench --version && vulcanbench --help
       - name: Pytest (fast, no Docker, no coverage gate)
-        run: pytest -m "not slow and not docker" --no-cov -p no:cacheprovider
+        run: pytest -n auto -m "not slow and not docker" --no-cov -p no:cacheprovider
 
   dashboard-lint-build:
     runs-on: ubuntu-latest

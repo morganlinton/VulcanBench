@@ -36,7 +36,9 @@ jobs:
         with:
           toolchain: "1.87.0"
           components: clippy, rustfmt
-      - run: cargo install cargo-audit --version 0.21.2 --locked
+      - uses: taiki-e/install-action@v2  # prebuilt cargo-audit, not a 2-minute source build
+        with:
+          tool: cargo-audit@0.21.2
       - run: pip install -e ".[dev,test]"
       - name: Find changed task directories
         id: tasks

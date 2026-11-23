@@ -7,6 +7,41 @@ changing run conditions. Suite-level policy for v4 lives in
 [tasks/coding-intelligence-index-v4/CHARTER.md](../tasks/coding-intelligence-index-v4/CHARTER.md);
 entries here record the measurements behind those rules.
 
+## 2026-11-22: GPT-6.2 Astra runs on Frontier v4 on the same pinned Codex 0.166.0 as GPT-6.2 Sol
+
+### Decision
+
+GPT-6.2 Astra (`gpt-6.2-astra`) is swept on VulcanBench Frontier v4 at Low,
+Medium, High, Extra-high and Max through Codex on the ChatGPT subscription
+(`scripts/run_gpt62_astra_v4.sh`, outputs `runs-effort-gpt62-astra/`).
+Owner request in chat, 2026-11-22. It runs one task at a time from a run
+worktree pinned to a bench tag, like every sweep, under the flat 3-hour task
+timeout.
+
+The column runs on Codex CLI 0.166.0 from the prefix the GPT-6.2 Sol column
+used (`~/.local/share/vulcanbench/codex-0.166.0/`), so the two GPT-6.2
+columns differ only in the model.
+
+### Evidence
+
+- One-line probes on the ChatGPT login on 2026-11-22 ("Reply with the
+  single word OK.") on 0.166.0: `gpt-6.2-astra` answered at `low`, `xhigh`
+  and `max`, and the Codex session log records the model as
+  `gpt-6.2-astra`. `gpt-6-astra` also answered at `low`.
+- The login reports plan `prolite` (active until 2026-12-09), the plan the
+  GPT-6.2 Sol column ran on. The plan sets usage windows, not the model;
+  Astra uses more of a window per task than Sol, so quota waits between
+  attempts are likelier (the sweep waits them out); disclose it.
+- List prices, checked 2026-11-22 at developers.openai.com/api/docs/pricing
+  and the model page (USD per 1M tokens, standard, short context): $8.00
+  input, $0.40 cached input, $40.00 output (GPT-6 Astra: $10.00, $1.00,
+  $50.00). Prompts over 272K input tokens bill at 2x input and cache, 1.5x
+  output for the whole request; that tier is not inferred by
+  `harness/pricing.py`, so cost cards follow the GPT-6 Astra precedent of a
+  standard-rate estimate plus an upper bound at the long-context tier. The
+  model page gives no release date and lists no effort levels beyond
+  rejecting `none`. Ultra stays blocked (`vulcanbench.toml`).
+
 ## 2026-11-21: a probe whose two replies are both malformed JSON is invalid (v3.32)
 
 ### Decision

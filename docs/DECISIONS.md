@@ -7,6 +7,32 @@ changing run conditions. Suite-level policy for v4 lives in
 [tasks/coding-intelligence-index-v4/CHARTER.md](../tasks/coding-intelligence-index-v4/CHARTER.md);
 entries here record the measurements behind those rules.
 
+## 2026-11-23: GPT-6.2 Astra's Code quality is judged by Muse Spark 1.3 and Grok 4.6 (v3.33)
+
+### Decision
+
+GPT-6.2 Astra's 115 Frontier v4 runs are judged for Code quality under
+protocol v3.33 (the v3.32 protocol on a new population) by Muse Spark 1.3
+and Grok 4.6. Owner choice in chat, 2026-11-23: the same panel as Gemini 4
+Neon (v3.32) and GPT-6.2 Sol (v3.31), and neither judge is from OpenAI.
+
+Both judges retake the exam before any counted call. If one fails, the
+other publishes alone under the single-panel rule and the failure is
+disclosed. The round runs from a run worktree pinned to its own bench tag;
+no sweep overlaps the judging window.
+
+### Evidence
+
+- The GPT-6.2 Astra sweep finished on 2026-11-23 at 04:38 PST after 10 h
+  31 min: 115 of 115 runs finished (23 per level, Low to Max), every one
+  functional 1.0, no timeouts, no dirty runs, no duplicates, no quota waits,
+  every run from `bench/2026-11-22-gpt62-astra-frontier-v4` on Codex CLI
+  0.166.0 with no served-model switch.
+- Dry run of the population build and freeze on 2026-11-23 (outputs
+  discarded): 115 rows, 0 excluded, 0 missing, 23 per cell, 23 quirk keys,
+  largest prompt 56,448 characters. The Muse binary and the Cursor
+  `2026.10.01-e373342` digest matched their pins.
+
 ## 2026-11-22: GPT-6.2 Astra runs on Frontier v4 on the same pinned Codex 0.166.0 as GPT-6.2 Sol
 
 ### Decision

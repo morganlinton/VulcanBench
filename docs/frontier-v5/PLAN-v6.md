@@ -32,12 +32,16 @@ Six languages by two repo sizes: twelve environments.
 
 | Language | Smaller repo | Larger repo |
 | --- | --- | --- |
-| C | to source | to source |
-| C++ | to source | to source |
-| Java | to source | to source |
-| JavaScript or TypeScript | to source | to source |
-| Python | to source | to source |
-| Rust | to source | to source |
+| C | pkgconf | curl |
+| C++ | OpenCC | binaryen |
+| Java | jsoup | grpc-java |
+| JavaScript or TypeScript | hono | vercel/ai |
+| Python | mpmath | django |
+| Rust | ruint | nushell |
+
+The repo per cell was chosen in the pilot by where a large upstream feature
+exists to serve as an anchor (section 3); the pins and sizes are in each
+environment's lock entry.
 
 - **Size** is lines of first-party source at the pin (tests, vendored and
   generated code excluded), measured with one tool and recorded in the lock.
@@ -51,28 +55,37 @@ Six languages by two repo sizes: twelve environments.
 
 ## 3. An environment
 
-One pinned repo at one commit, one image, and a **worklist** of about 8
-independent items (pilot: the exact count) that the agent receives as a
-file:
+One pinned repo at one commit, one image, and a **worklist** that the agent
+receives as a file, sized so that no model finishes it inside the budget:
 
-- at least half are defects (upstream fixes merged after the pin, each with
-  its own held-out checks);
-- at least one small feature;
-- where the repo supports it, one performance target under a deterministic
-  cost oracle and one diagnosis item from field evidence.
+- **A floor of about 8 small items:** upstream fixes (or small features),
+  each one graded unit with its own held-out checks. Fixes merged before the
+  pin may be taken back out of the base when a repo has too few after it.
+- **One or two anchors:** large upstream features (or a performance target
+  under a deterministic cost oracle), each graded in 4 to 8 units by its
+  held-out tests, so partial work counts and a stub of the feature's
+  surface completes no unit.
 
-The four shapes of PLAN-v5 (feature work, property oracles, performance,
-diagnosis) live on as item kinds, and the release 2 candidates become items
-in their repos' worklists.
+The pilot (two cells, 2026-11-22 and 2026-11-23) showed why: worklists of
+small fixes alone were finished by every frontier model inside the budget
+and did not separate them; with a feature anchor, every model used its whole
+budget and the scores differed. The four shapes of PLAN-v5 live on as item
+kinds: feature work and performance as anchors, defects and diagnosis in the
+floor, property oracles in either.
 
-Rules for items: each has a reference change and held-out checks; items are
-independent (each reference change alone passes exactly its own item, and
-all together pass all); the visible suite passes at base.
+Rules for units: each has a reference change and held-out checks; floor
+items and anchors are independent (each reference change alone passes
+exactly its own units, and all together pass all); the visible suite passes
+at base and with every reference applied; the entry says
+everything its held-out checks assert, the agent keeps the tests that
+existed before each fix, and nothing in the tree gives a check away
+(section 6, checks 5 to 7).
 
 ## 4. A run
 
 - One agent session per environment with the worklist and a **fixed
-  wall-clock budget** (pilot: the value, starting hypothesis 20 minutes),
+  wall-clock budget** of 30 minutes (pilot value, confirmed by the
+calibration run of section 6, check 4),
   the same for every model. The agent is told the budget and may take items
   in any order. At the budget the session is stopped and the tree is graded
   as it stands.
@@ -84,10 +97,12 @@ all together pass all); the visible suite passes at base.
 
 ## 5. Scoring and the board
 
-- **An item is done** when all of its held-out checks pass. The tamper scan
-  flags an environment to zero. How a broken guard is charged (to its item,
-  or one item off the environment's count) is set by the pilot.
-- **Headline:** items done over all items, with `n=` and ±1 binomial stderr.
+- **A unit is done** when all of its held-out checks pass. A floor item is
+  one unit; an anchor is several. The tamper scan flags an environment to
+  zero. A broken guard (an existing test that passed at base) takes one done
+  unit off the environment's count (the pilot's `one_item_off` policy).
+- **Headline:** units done over all units, with `n=` and ±1 binomial stderr,
+  and floor and anchor totals shown beside it.
   Beside it: the mean per size tier, the mean per language, and the
   six-by-two heatmap. Cell values are shown as counts, not ranked.
 - **Also reported:** tokens and list-price cost per run. Wall-clock speed is
@@ -106,6 +121,55 @@ the grid.
 4. Ceiling check: if the strongest model at its top effort finishes every
    item inside the budget in the calibration run, items are added before
    the environment is admitted.
+5. Entry against assertions. Every held-out check is read against its
+   worklist entry. Each assertion on exact message or output text, on file
+   state, on an exact error code or exception type, or on an internal
+   symbol must be stated in the entry, or be something a competent fix
+   cannot avoid (it follows from behaviour the entry states, from the
+   repository's existing conventions, or from the test's own fixture).
+   Where neither holds, the entry is clarified or the verifier's copy of
+   the check is narrowed, and the change is recorded in the environment's
+   design record. Check 2 does not cover this: it shows that the checks
+   need the reference, not that the entry is enough to pass them.
+6. Visible guards for existing tests. A held-out test that existed before
+   its item's earliest fix stays in the agent's tree, in a version that
+   passes at base: the pin's test with the item's changes to it reversed
+   and any assertion the fix changes cut. The verifier still runs the
+   pin's version. Each visible version must pass at base and with the full
+   reference. A test stays fully held out only when every version of it
+   asserts what the fix changes. Tests the fix itself added stay held out.
+7. No leaked test data. Nothing in the agent's image gives away a held-out
+   check or describes an item as done: no held-out test or check name, no
+   data file or expected output of a held-out test, no comment left behind
+   by a removed test, and no changelog, README, book or example text that
+   describes an item's fix or feature as present. The check lists every
+   file each item's upstream change touched outside the graded source and
+   compares the agent's tree with it, then searches the whole image for
+   the check names and for the names a feature item adds.
+
+8. Anchor units. Every anchor unit fails at base and passes with the
+   anchor's reference alone; a tree with every floor reference and no
+   anchor scores the floor units, no anchor unit, and no guard charge; a
+   stub of the anchor's public surface completes no unit.
+9. Literal-reading implementation. A second implementation written from
+   the worklist entry alone (not from the reference) passes every floor unit
+   and at least two anchor units with no guard failing; each case it fails
+   while following the text is an entry defect, fixed in the entry or
+   ungraded with a reason.
+10. Verifier hardening. A must-fail sentinel runs in every test process the
+    verifier starts, and reports from a process whose sentinel passes are
+    distrusted; graded code builds and runs as an unprivileged user that
+    cannot reach the expected outputs, the reports or the trusted tools.
+
+Checks 5 to 7 were added on 2026-11-22, after the second pilot cell's
+first runs: most of the items both models missed there failed on something
+the worklist entry did not say, and the agents had lost existing
+regression tests along with the new ones. They apply to every environment,
+the two pilot cells included. Checks 8 to 10 were added on 2026-11-24
+from building all twelve environments: model runs and literal readings
+found unstated rule interactions on large features, and several drafted
+verifiers had a sentinel in only one of several test processes or let
+graded code run as root.
 
 ## 7. What this supersedes
 
@@ -120,14 +184,14 @@ the grid.
 
 ## 8. Order of work
 
-1. **Pilot cell (R14):** C++, smaller tier, on CLI11, whose six release 1
-   defects already carry references and held-out checks. Add items to reach
-   the worklist size, build the budgeted run, then (on the owner's
-   go-ahead for the paid runs) run GPT-6.2 Sol and one cheaper model to set
-   the budget and confirm the scores spread.
-2. Meanwhile the other sessions measure the seed repos and source items for
-   their cells; nothing is built until the pilot fixes the format.
-3. Freeze this plan with the pilot's numbers, build the other eleven
-   environments in parallel, admit them, lock release 2.0.0.
-4. Launch sweeps for the lineup (owner's go-ahead), board, Frontier v4
+1. **Pilot cells (done):** C++ smaller on CLI11 and C larger on curl showed
+   that worklists of small fixes do not separate frontier models; a third,
+   TypeScript larger on vercel/ai with a feature anchor, did (2026-11-23,
+   three models at 30 minutes).
+2. **All twelve environments built and admitted** under checks 1 to 3 and 5
+   to 10 (2026-11-24).
+3. **Calibration runs** (check 4) on every environment, on the owner's
+   go-ahead for the paid runs; add an anchor where a model finishes.
+4. Freeze this plan with the calibration's numbers, lock release 2.0.0.
+5. Launch sweeps for the lineup (owner's go-ahead), board, Frontier v4
    board archived the day it launches (R9).

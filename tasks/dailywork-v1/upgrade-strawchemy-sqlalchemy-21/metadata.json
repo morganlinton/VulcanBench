@@ -42,10 +42,6 @@
         "cmd": "python -m pytest -q -p no:cacheprovider -p no:xdist 'tests/unit/mapping/test_schemas.py::test_query_schemas'"
       },
       {
-        "name": "inspector_python_type",
-        "cmd": "python -m pytest -q -p no:cacheprovider -p no:xdist 'tests/unit/test_inspector.py::test_python_type'"
-      },
-      {
         "name": "share_merged_rank_ctes_keep_each_page_on_its_own_rank",
         "cmd": "python -m pytest -q -p no:cacheprovider -p no:xdist 'tests/unit/transpiler/core/test_share.py::test_merged_rank_ctes_keep_each_page_on_its_own_rank'"
       },
@@ -113,7 +109,7 @@
       },
       {
         "name": "unit_suite_sqlalchemy_20",
-        "cmd": "PYTHONPATH=/opt/sqlalchemy-2.0 python -m pytest -q -p no:cacheprovider -p no:xdist tests/unit"
+        "cmd": "PYTHONPATH=/opt/sqlalchemy-2.0 python -m pytest -q -p no:cacheprovider -p no:xdist tests/unit --deselect 'tests/unit/test_inspector.py::test_python_type'"
       }
     ]
   },

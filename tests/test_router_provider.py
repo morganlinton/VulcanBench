@@ -117,6 +117,7 @@ def test_router_route_manifest_and_effort(monkeypatch: pytest.MonkeyPatch) -> No
         "router": "martian",
         "base_url": "https://router.example/v1",
         "wire_model": "auto",
+        "api": "chat",
         "pinned": False,
     }
     cfg = effort_config("router", "high", "martian/auto")
@@ -268,3 +269,54 @@ def test_reports_live_cost_only_for_gateways() -> None:
     assert reports_live_cost("openrouter:openrouter/auto")
     assert not reports_live_cost("openai:gpt-6.1-terra")
     assert not reports_live_cost("not-a-spec")
+
+
+RESPONSES_BODY = {
+    "id": "resp_1",
+    "model": "gpt-6-luna",
+    "provider": "openai",
+    "status": "completed",
+    "output": [{"type": "message", "content": [{"type": "output_text", "text": "hi"}]}],
+    "usage": {"input_tokens": 7, "output_tokens": 1, "cost": 0.0021},
+}
+
+
+def test_router_provider_responses_mode_reads_cost(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("ROUTER_RAMP_BASE_URL", "https://api.router.example/v1/")
+    monkeypatch.setenv("ROUTER_RAMP_API_KEY", "rk-ramp-0123456789")
+    monkeypatch.setenv("ROUTER_RAMP_API", "responses")
+    seen: dict[str, object] = {}
+
+    def fake_post(url, headers, payload, timeout=120):  # type: ignore[no-untyped-def]
+        seen["url"] = url
+        seen["payload"] = payload
+        return RESPONSES_BODY
+
+    monkeypatch.setattr(P, "_http_post_json", fake_post)
+    tools = [{"type": "function", "function": {"name": "f", "parameters": {"type": "object"}}}]
+    resp = RouterProvider("ramp/switchyard").complete([{"role": "user", "content": "x"}], tools)
+    assert seen["url"] == "https://api.router.example/v1/responses"
+    payload = seen["payload"]
+    assert isinstance(payload, dict)
+    assert payload["model"] == "switchyard"
+    assert "input" in payload and "messages" not in payload
+    assert "reasoning" not in payload and "usage" not in payload
+    assert payload["tool_choice"] == "auto"
+    assert resp.content == "hi"
+    assert resp.served_model == "gpt-6-luna"
+    assert resp.response_id == "resp_1"
+    assert resp.reported_cost_usd == pytest.approx(0.0021)
+    assert resp.usage.prompt_tokens == 7 and resp.usage.completion_tokens == 1
+    assert route_manifest("router:ramp/switchyard")["api"] == "responses"
+
+
+def test_router_api_style_defaults_and_validates(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.delenv("ROUTER_X_API", raising=False)
+    assert P.router_api_style("x") == "chat"
+    monkeypatch.setenv("ROUTER_X_API", "Responses ")
+    assert P.router_api_style("x") == "responses"
+    monkeypatch.setenv("ROUTER_X_API", "grpc")
+    with pytest.raises(ProviderError, match="ROUTER_X_API"):
+        P.router_api_style("x")
+    monkeypatch.setenv("ROUTER_X_BASE_URL", "https://x.example/v1")
+    assert route_manifest("router:x/auto")["api"] is None

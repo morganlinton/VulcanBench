@@ -1029,6 +1029,20 @@ def router_env_names(name: str) -> tuple[str, str]:
     return f"ROUTER_{slug}_BASE_URL", f"ROUTER_{slug}_API_KEY"
 
 
+def router_api_style(name: str) -> str:
+    """Which OpenAI surface ``router:<name>/...`` speaks: ``chat`` or ``responses``.
+
+    ``ROUTER_<NAME>_API=responses`` selects the Responses API. Ramp Router, for
+    one, serves both but returns its per-call ``usage.cost`` only on
+    ``/responses``; its ``/chat/completions`` reports the served model alone.
+    """
+    slug = name.upper().replace("-", "_")
+    style = os.environ.get(f"ROUTER_{slug}_API", "chat").strip().lower() or "chat"
+    if style not in {"chat", "responses"}:
+        raise ProviderError(f"ROUTER_{slug}_API must be 'chat' or 'responses', got {style!r}")
+    return style
+
+
 class RouterProvider(LLMProvider):
     """A model router behind an OpenAI-compatible ``/chat/completions`` endpoint.
 
@@ -1044,7 +1058,9 @@ class RouterProvider(LLMProvider):
     ledger (``harness/agent/routing.py``). ``usage: {include: true}`` is sent
     by default so OpenRouter-compatible gateways return the cost; a gateway
     that rejects unknown fields can turn it off with
-    ``ROUTER_<NAME>_USAGE_INCLUDE=0``.
+    ``ROUTER_<NAME>_USAGE_INCLUDE=0``. A gateway that bills only on the
+    Responses API (Ramp Router) is addressed with ``ROUTER_<NAME>_API=responses``;
+    the same fields are then read from the Responses body.
 
     Effort is never sent (the router decides the backend and its settings), so
     every level is recorded-but-not-sent. Table pricing applies only through a
@@ -1085,6 +1101,8 @@ class RouterProvider(LLMProvider):
         base = os.environ.get(base_var, "").rstrip("/")
         if not base:
             raise ProviderError(f"{base_var} is not set")
+        if router_api_style(name) == "responses":
+            return self._responses_complete(base, api_key, wire, messages, tools, timeout)
         extra: dict[str, Any] = {}
         if os.environ.get(f"{base_var[: -len('_BASE_URL')]}_USAGE_INCLUDE", "1") != "0":
             extra["usage"] = {"include": True}
@@ -1098,6 +1116,28 @@ class RouterProvider(LLMProvider):
             temperature=None,
             extra_payload=extra or None,
         )
+
+    @staticmethod
+    def _responses_complete(
+        base: str,
+        api_key: str,
+        wire: str,
+        messages: list[dict[str, Any]],
+        tools: list[dict[str, Any]],
+        timeout: float,
+    ) -> LLMResponse:
+        # No ``reasoning`` block: the router owns the backend and its effort.
+        payload: dict[str, Any] = {"model": wire, "input": _to_responses_input(messages)}
+        if tools:
+            payload["tools"] = [_openai_tool_to_responses(t) for t in tools]
+            payload["tool_choice"] = "auto"
+        body = _http_post_json(
+            f"{base}/responses",
+            {"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"},
+            payload,
+            timeout=timeout,
+        )
+        return _parse_responses_body(body)
 
 
 class QwenProvider(LLMProvider):
@@ -1428,6 +1468,7 @@ def _parse_responses_body(body: dict[str, Any], cached_input_factor: float = 0.1
         raw=body,
         served_model=_served_model(body),
         response_id=_response_id(body),
+        reported_cost_usd=_reported_cost(usage),
     )
 
 
@@ -1652,11 +1693,16 @@ def _router_manifest(model: str) -> dict[str, Any] | None:
     except ProviderError:
         return None
     base_var, _ = router_env_names(name)
+    try:
+        api = router_api_style(name)
+    except ProviderError:
+        api = None
     return {
         "via": "router",
         "router": name,
         "base_url": os.environ.get(base_var) or None,
         "wire_model": wire,
+        "api": api,
         "pinned": False,
     }
 

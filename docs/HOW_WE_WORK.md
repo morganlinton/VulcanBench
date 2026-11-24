@@ -345,6 +345,66 @@ it, before any model call. No flag bypasses that check. To change a frozen
 external suite, fix the task, bump `version` in its `suite.json`, and run
 `vulcanbench suite freeze` again.
 
+### Building a suite from your own repository
+
+The suite builder turns merged pull requests from one of your own GitHub
+repositories into tasks. It is for subscribers, so every command that creates
+or changes a suite (`init`, `prs list`, `task scaffold`, `task author`,
+`add-task`, `remove-task`, `validate`, `freeze`) needs the builder unlocked on
+this machine. Reading suites (`list`, `show`, `check`, `access`) and running a
+frozen one stay open.
+
+```
+vulcanbench suite unlock                       # asks for the subscriber password once
+vulcanbench suite init acme-api --display-name "Acme API" --repo acme/api
+vulcanbench suite prs list --suite acme-api --since 2026-08-01
+vulcanbench suite task scaffold acme-api --pr 412
+vulcanbench suite task author acme-api --task pr-412-fix-etag --harness codex --model gpt-6.1-terra
+vulcanbench suite validate acme-api --task pr-412-fix-etag --sandbox docker
+vulcanbench suite add-task acme-api --task pr-412-fix-etag
+vulcanbench suite freeze acme-api
+```
+
+1. **`prs list`** asks `gh` (your own login) for merged pull requests and
+   scores each from 0 to 100: it changes tests, its source change is a
+   task-sized number of lines in a few files, it is not a dependency bump, and
+   it has a description or a linked issue. Flags name what makes one a poor
+   task. No model call.
+2. **`task scaffold`** clones the repository into the suites home's cache,
+   finds the pull request's base commit (the first parent of a merge commit,
+   the commit before a rebase, the parent of a squash) and exports `repo/` at
+   that commit with `git archive`, so there is no `.git` and no history that
+   holds the fix. The pull request's own test files are removed from `repo/`.
+   `gold_patch.diff` is the non-test part of the change. `issue.md` is a
+   marked DRAFT. Everything the builder works from (the full diff, the
+   upstream tests after the fix, the linked issues, a self-check script) goes
+   in the task's `build/` folder, which is outside `task_hash` and never
+   reaches an agent's workspace. A private repository has no open source
+   license, so pass `--license-note` to record the terms in `repo/NOTICE`.
+   No model call.
+3. **`task author`** is the one step that spends quota. One session in the
+   chosen CLI harness, on this machine, in a scratch copy of the task with
+   network off, rewrites the issue so it describes the problem and not the
+   fix, writes hidden `vb_` tests with the canary, fills the `tests` block,
+   and checks its work with `build/selfcheck.py`. Afterwards only `issue.md`,
+   `tests/`, `gold_patch.diff`, `build/author_notes.md`, deletions of test
+   files under `repo/` and a short list of `metadata.json` keys are copied
+   back; provenance keys and every other change are discarded and listed in
+   `build/author.json`. It never re-runs and never validates itself.
+4. **`validate`** runs the task validator (gold solves, base fails, three
+   deterministic rounds) and two builder checks: the fix is not already in
+   `repo/` and the gold patch applies. Review the issue, the tests and the
+   verdict, then `add-task` the ones that pass and `freeze` the suite.
+
+The password is a placeholder for subscriber accounts. `[builder].password_hash`
+in `vulcanbench.toml` holds its scrypt hash (made with
+`vulcanbench suite password-hash`), the password is read from a prompt or one
+line on stdin and is never stored, logged or passed as an argument, and
+`vulcanbench suite unlock` records a fingerprint of the hash under
+`~/.config/vulcanbench`. Changing the password locks every machine again. The
+code is public and runs locally, so this keeps the builder behind a
+deliberate step but does not stop someone who edits it.
+
 ### Watching runs from the GUI
 
 `make gui` starts a localhost page (`http://127.0.0.1:3000/runs`) that lists

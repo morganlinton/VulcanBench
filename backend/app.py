@@ -27,6 +27,7 @@ from pydantic import BaseModel
 from backend import db
 from backend.runner.config import load_config as load_runner_config
 from backend.runner.routes import router as runner_router
+from backend.runner.routes_suites import router as runner_suites_router
 from backend.runner.supervisor import SERVICE as RUNNER_SERVICE
 from harness import __version__
 from harness.calibration import calibrate_tasks
@@ -70,6 +71,7 @@ app.add_middleware(
 
 # Local run GUI (backend/runner): opt-in with VULCANBENCH_RUNNER=1, loopback only.
 app.include_router(runner_router)
+app.include_router(runner_suites_router)
 
 
 def _require_write_token(authorization: str | None = Header(default=None)) -> None:

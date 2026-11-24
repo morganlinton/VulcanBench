@@ -52,6 +52,6 @@ export function Warnings({ items }: { items: string[] }) {
 
 export function Row({ k, v, mono = true }: { k: string; v: React.ReactNode; mono?: boolean }) {
   return (
-    <div className="flex justify-between gap-3"><dt className="text-zinc-400">{k}</dt><dd className={`text-right break-all ${mono ? "font-mono" : ""}`}>{v}</dd></div>
+    <div className="flex justify-between gap-3"><dt className="shrink-0 whitespace-nowrap text-zinc-400">{k}</dt><dd className={`text-right break-all ${mono ? "font-mono" : ""}`}>{v}</dd></div>
   );
 }

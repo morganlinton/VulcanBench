@@ -587,6 +587,12 @@ class Discovery:
             commit = _first_str(source, ("commit", "sha", "git_commit", "head"))
             if tag and not tag.startswith("bench/"):
                 tag = tag if "bench/" in tag else None
+        if owner is not None and not tag:
+            # Per-task summaries carry no source block; the level's job knows its tag.
+            tag = str(owner.spec["tag"]) if owner.spec.get("tag") else None
+            commit = commit or (
+                str(owner.spec["tag_commit"]) if owner.spec.get("tag_commit") else None
+            )
         suite = summary.get("suite") if summary else None
         check = firstcheck.check_harness_run(
             run_dir,
@@ -619,7 +625,13 @@ class Discovery:
             job=job_summary(owner) if owner is not None else None,
             suite_or_task=str(suite or task_id or ""),
             model=bare_model or model_spec or None,
-            harness=harness or "vulcan",
+            harness=harness
+            or (
+                str(owner.spec["harness"])
+                if owner is not None and owner.spec.get("harness")
+                else ""
+            )
+            or "vulcan",
             effort=str(effort) if effort else None,
             source_tag=tag,
             source_commit=commit,
@@ -805,10 +817,18 @@ def job_summary(job: Job) -> dict[str, Any]:
             "harness",
             "suite",
             "suite_name",
+            "suite_custom",
+            "suites_home",
+            "suite_lock_digest",
             "effort",
             "out_dir",
             "resume_at",
             "quota_continue",
+            "task",
+            "task_dir",
+            "pr",
+            "batch_id",
+            "billing",
         )
     }
     return d

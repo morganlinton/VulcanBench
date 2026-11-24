@@ -110,7 +110,8 @@ def child_env(overrides: dict[str, str] | None = None, *, path_prepend: str = ""
 
 
 def bench_tags(repo: Path | None = None) -> list[str]:
-    out = _git(repo or REPO_ROOT, "tag", "-l", "bench/*", "--sort=-creatordate")
+    # Newest first; tags cut in the same second fall back to their dated name.
+    out = _git(repo or REPO_ROOT, "tag", "-l", "bench/*", "--sort=-refname", "--sort=-creatordate")
     return [t for t in (out or "").splitlines() if t.strip()]
 
 

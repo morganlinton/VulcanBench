@@ -21,12 +21,17 @@ Per-task ``build/`` folders hold the builder's working files (the answer key
 among them) and never ship: nothing under ``build/`` is in ``task_hash``, and
 the agent workspace is prepared from ``repo/`` only.
 
+Commands that create or change a suite (``init``, ``add-task``,
+``remove-task``, ``validate``, ``freeze`` and the builder's ``prs`` and
+``task`` commands) are password-gated: see :mod:`harness.suite_builder.access`
+(exit 7 while locked). ``list``, ``show`` and ``check`` stay open.
+
 Every subcommand takes ``--json``: stdout then holds exactly one JSON document
 (``schema`` names its shape) and human text goes to stderr; an error is
 ``{"schema": "vulcanbench.suite.error.v1", "error": {"code", "message", ...}}``.
 Exit codes: 0 ok, 1 failed (drift, a FAIL, an unvalidated task), 2 refused
 (bad id, a collision, an empty suite), 3 Docker unavailable, 4 a SKIP without a
-FAIL, 5 not found, 8 the directory already exists.
+FAIL, 5 not found, 7 the builder is locked, 8 the directory already exists.
 
 The GUI shells out to these commands; it detects the group at a bench tag by
 grepping ``harness/cli.py`` for ``register_suite_commands``. A later builder
@@ -67,6 +72,7 @@ EXIT_REFUSED = 2
 EXIT_DOCKER = 3
 EXIT_SKIP = 4
 EXIT_MISSING = 5
+EXIT_LOCKED = 7
 EXIT_EXISTS = 8
 
 SUITES_HOME_HELP = (
@@ -120,6 +126,16 @@ def _guarded(json_output: bool, body: Callable[[], None]) -> None:
         else:
             print(f"error {exc.message}")
         raise SystemExit(exc.exit_code) from exc
+
+
+def _require_builder() -> None:
+    """The password gate for every command that creates or changes a suite (exit 7)."""
+    from harness.suite_builder.access import BuilderLocked, require_unlocked  # noqa: PLC0415
+
+    try:
+        require_unlocked()
+    except BuilderLocked as exc:
+        raise SuiteCommandError(exc.code, exc.message, EXIT_LOCKED) from exc
 
 
 # ---------------------------------------------------------------------------
@@ -260,6 +276,7 @@ def suite_init(
     """Create <suites_home>/<id>/ with an empty manifest and a README."""
 
     def body() -> None:
+        _require_builder()
         if not ID_RE.match(suite_id):
             raise SuiteCommandError(
                 "invalid_id",
@@ -457,6 +474,7 @@ def suite_add_task(
     """
 
     def body() -> None:
+        _require_builder()
         home = resolve_suites_home(suites_home)
         suite_dir = home / suite_id
         manifest = _load_manifest(suite_dir)
@@ -518,6 +536,7 @@ def suite_remove_task(
     """Drop a task from the suite's task list (its directory is left alone)."""
 
     def body() -> None:
+        _require_builder()
         home = resolve_suites_home(suites_home)
         suite_dir = home / suite_id
         manifest = _load_manifest(suite_dir)
@@ -556,6 +575,7 @@ def suite_freeze(
     """Write suite.lock.json: the version and the task hash of every admitted task."""
 
     def body() -> None:
+        _require_builder()
         home = resolve_suites_home(suites_home)
         suite_dir = home / suite_id
         manifest = _load_manifest(suite_dir)
@@ -628,6 +648,31 @@ def suite_check(
     _guarded(json_output, body)
 
 
+BUILDER_CHECK_REASONS = {
+    "no_answer_in_repo": "the fix is already in repo/ (a .git directory, or gold_patch.diff reverse-applies)",
+    "gold_applies": "gold_patch.diff does not apply to repo/",
+}
+
+
+def builder_checks(task_dir: Path) -> dict[str, bool | None]:
+    """Answer-leak checks the validator does not make; ``None`` where they do not apply.
+
+    ``no_answer_in_repo``: ``repo/`` has no ``.git`` and the gold patch does not
+    already reverse-apply (the starting state is really before the fix).
+    ``gold_applies``: ``git apply --check`` of the gold patch against ``repo/``.
+    """
+    from harness.suite_builder.scaffold import gold_applies  # noqa: PLC0415
+
+    repo_dir = task_dir / "repo"
+    gold = task_dir / "gold_patch.diff"
+    if not repo_dir.is_dir() or not gold.is_file():
+        return {"no_answer_in_repo": None, "gold_applies": None}
+    has_git = any(p.name == ".git" for p in repo_dir.rglob(".git"))
+    applies = gold_applies(repo_dir, gold)
+    already = gold_applies(repo_dir, gold, reverse=True)
+    return {"no_answer_in_repo": not has_git and not already, "gold_applies": applies}
+
+
 def suite_validate(
     *,
     suite_id: str,
@@ -645,6 +690,7 @@ def suite_validate(
     """
 
     def body() -> None:
+        _require_builder()
         if sandbox not in {"local", "docker"}:
             raise SuiteCommandError(
                 "invalid_sandbox", f"--sandbox must be local|docker, got {sandbox!r}", EXIT_REFUSED
@@ -680,9 +726,15 @@ def suite_validate(
         for tid in task_ids:
             task_dir = suite_dir / tid
             res = validate_task(task_dir, opts)
+            checks = builder_checks(task_dir)
+            failed_checks = [name for name, ok in checks.items() if ok is False]
+            if failed_checks:
+                res.status = "FAIL"
+                res.reasons = [*res.reasons, *(BUILDER_CHECK_REASONS[n] for n in failed_checks)]
             record = {
                 "schema": VALIDATE_FILE_SCHEMA,
                 **result_to_dict(res),
+                "checks": checks,
                 "sandbox": sandbox,
                 "image": image,
                 "task_hash": task_hash(load_task(tid, suite_dir)),
@@ -794,3 +846,7 @@ def register_suite_commands(
     p.add_argument("--sandbox", dest="sandbox", default="local", help="local|docker")
     p.add_argument("--image", dest="image", default=None, help="Docker image for --sandbox docker")
     _common(p)
+
+    from harness.suite_builder.commands import register_builder_commands  # noqa: PLC0415
+
+    register_builder_commands(subparsers)

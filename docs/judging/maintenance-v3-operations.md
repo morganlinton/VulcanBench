@@ -1008,3 +1008,25 @@ operational notes live here.
   false because of those two, no reviewer fallback. Combined 84.32 (22
   judged), 87.48, 87.87 and 87.70 (22 judged) from low to extra high; Code
   quality 66.15, 67.87, 69.07 and 68.69.
+
+## v3.33, November 23, 2026: GPT-6.2 Astra on Frontier v4
+
+- From `bench/2026-11-23-gpt62-astra-judging-v333` (dc7f85611), judged by
+  Muse Spark 1.3 and Grok 4.6 (Cursor pinned to 2026.10.01-e373342), the
+  owner's choice on November 23. The GPT-6.2 Astra sweep finished on November
+  23 at 04:38 PST, so no sweep overlaps the window. Population frozen 07:25
+  PST: 115 rows, none excluded or missing. Judging window 07:25 to 19:13 PST,
+  one window, no stops.
+- Calibration: Muse passed all 20 gates without the allowance (07:54 PST);
+  Grok passed all 20 gates without the allowance (08:39 PST).
+- The wrapper accepted 440 display renames (Cursor reports "Grok 4.6 Medium"
+  for the pinned `cursor-grok-4.6-medium`); six of those responses then failed
+  the frozen validator and were re-filed as that failure, so the protocol's
+  retry applied. Second attempts under the frozen rule: Muse 9 (seven
+  unsupported excerpts, two JSON syntax errors), Grok 7 (six unsupported
+  excerpts, one JSON syntax error). Every second attempt was valid; no call
+  was invalidated and there were no quota stops.
+- Summary (19:13:28 PST, November 23): both panels passing, 115 of 115
+  published, `ready_for_publication` true, no reviewer fallback. Combined
+  87.68, 88.89, 89.26, 89.05 and 89.42 from low to max; Code quality 67.27,
+  70.65, 72.88, 72.98 and 74.53.

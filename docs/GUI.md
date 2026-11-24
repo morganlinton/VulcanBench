@@ -206,6 +206,12 @@ run, and its containers are attributed to it by the orphan check.
   is logged in, and the harness reads its own login.
 - Loopback only; no auth system, no remote exposure. The runner routes exist
   only with `VULCANBENCH_RUNNER=1` and answer 403 to any other client address.
+  They also answer 403 to a browser page that is not served from localhost
+  (any `Origin` header whose host is not `localhost`, `127.0.0.1` or `::1`,
+  and `Origin: null`). Every page open in the browser connects from
+  127.0.0.1, and the public API's CORS policy allows any origin, so the
+  client address alone would let any website read the runner and post to
+  it. Requests with no `Origin` (curl, server-side fetches) still pass.
 
 ### Reading gate jobs
 

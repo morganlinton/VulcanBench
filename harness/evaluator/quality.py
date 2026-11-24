@@ -25,6 +25,7 @@ from radon.metrics import mi_visit
 
 from harness.evaluator import cfamily
 from harness.evaluator.langs import MetricResult, group_by_language
+from harness.tool_paths import resolve_tool
 
 # --- Tunable scoring constants -------------------------------------------------
 # Lint: violations per line of changed code beyond which lint_score hits 0.
@@ -88,7 +89,7 @@ def _budget_exhausted(remaining_s: RemainingSeconds | None) -> bool:
 def _python(
     workspace: Path, files: list[str], remaining_s: RemainingSeconds | None
 ) -> MetricResult:
-    if shutil.which("ruff") is None:
+    if resolve_tool("ruff") is None:
         return MetricResult(score=None, details={"tool": "ruff", "reason": "ruff not on PATH"})
 
     abs_files = [str((workspace / f).resolve()) for f in files if (workspace / f).exists()]
@@ -134,7 +135,13 @@ def _ruff_violations(
         return None
     try:
         proc = subprocess.run(
-            ["ruff", "check", "--output-format=json", "--no-cache", *abs_files],
+            [
+                resolve_tool("ruff") or "ruff",
+                "check",
+                "--output-format=json",
+                "--no-cache",
+                *abs_files,
+            ],
             cwd=workspace,
             capture_output=True,
             text=True,

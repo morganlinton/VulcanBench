@@ -663,6 +663,48 @@ R2 to R9 stay open and are recorded as their own entries when decided.
 This entry, the R1 status in [frontier-v5/ROLLOUT.md](frontier-v5/ROLLOUT.md)
 and the suite names section of CLAUDE.md. No run conditions changed.
 
+## 2026-11-19: Codex runs turn off web search and connected apps in every suite
+
+### Decision
+
+Owner go-ahead in chat, 2026-11-19, after the DailyWork v1 pilots. Every
+Codex solver run without `--network` now passes the Frontier v5 gate set as
+`--config` overrides (`_CODEX_NO_WEB_CONFIG` in `harness/agent/cli_agents.py`):
+`web_search="disabled"` and the features `apps`, `plugins`, `remote_plugin`,
+`browser_use`, `browser_use_external`, `in_app_browser` and `computer_use`
+off. This is the Codex counterpart of Claude Code's `--disallowedTools
+WebSearch,WebFetch`, which the harness already passes. It applies to every
+suite, Frontier v4 included, from the commit that carries it.
+
+The same change deletes the run-scoped credential copy (`codex-auth/`,
+`claude-code-auth/`) at the end of each containerized run, after refreshed
+tokens are synced back to the host.
+
+### Evidence
+
+- On Codex 0.166.0, `codex features list` shows all seven features on by
+  default, `--ignore-user-config` notwithstanding; with the overrides all
+  seven read false.
+- In the DailyWork v1 pilots (2026-11-19), each of GPT-6.1 Terra's three
+  bug fix attempts made one built-in web call, opening the networkx
+  contributor guide at its automated contributions policy. None reached
+  the fix or the hidden tests, but the tool was there.
+- Neither published Frontier v4 Codex sweep used a web or app tool: 0 of
+  115 GPT-6.1 Terra streams and 0 of 115 GPT-6.2 Sol streams contain a
+  `web_search` item or `codex_apps`. Turning them off does not change the
+  conditions those numbers were measured under in practice; it is
+  disclosed with the next Codex result on Frontier v4.
+- The pilots left staged OAuth tokens in all 18 run directories, plus the
+  signed-in account in Claude Code's `.claude.json`. They were deleted by
+  hand.
+
+### Revisit triggers
+
+- A Codex release renames a feature (unknown names are ignored, so a rename
+  would silently turn a tool back on): recheck `codex features list` when
+  the Codex pin moves.
+- A suite that wants web access passes `--network`, which leaves Codex's
+  web tools on, as it does for Claude Code.
 
 ## 2026-11-19: Gemini 4 Neon on Frontier v4 through Antigravity CLI, with a custom agent for web-off
 

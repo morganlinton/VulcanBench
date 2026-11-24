@@ -18,10 +18,12 @@ import pytest
 
 from harness.agent import loop as loop_mod
 from harness.agent.cli_agents import (
+    _CODEX_NO_WEB_CONFIG,
     _ZCODE_LIMIT_PATTERN,
     AgentContainerSpec,
     SubscriptionQuotaError,
     _agent_container_argv,
+    _anthropic_raw_usage,
     _stage_claude_code_auth,
     _stage_codex_auth,
     _subscription_env,
@@ -644,6 +646,13 @@ def test_run_agent_via_codex_subscription(tmp_path: Path, fake_codex: Path) -> N
     assert cli["requested_model"] == "gpt-5.6-sol"
     assert cli["reported_model"] is None
     assert cli["execution_boundary"] == "host-workspace; sandbox=workspace-write"
+    # Raw counts: Codex's input_tokens (120) already includes the 80 cached.
+    assert cli["raw_usage"] == {
+        "input_uncached": 40,
+        "cache_read": 80,
+        "cache_write": 0,
+        "output": 30,
+    }
     assert summary["economics"]["billing_mode"] == "subscription-included"
     stream_path = tmp_path / res["run_id"] / "cli-agent-stream.jsonl"
     events = [json.loads(line) for line in stream_path.read_text().splitlines()]
@@ -682,6 +691,84 @@ def test_codex_resolves_relative_workspace_before_passing_cd(
     start = next(data for event, data in collector.events if event == "cli_agent_start")
     cd_value = start["argv"][start["argv"].index("--cd") + 1]
     assert Path(cd_value).is_absolute()
+
+
+def _codex_argv(collector: _Collector) -> list[str]:
+    return next(data for event, data in collector.events if event == "cli_agent_start")["argv"]
+
+
+def test_codex_disables_provider_side_web_tools_unless_network(
+    tmp_path: Path, fake_codex: Path
+) -> None:
+    def settings(network: bool) -> list[str]:
+        collector = _Collector()
+        run_codex_task(
+            workspace=tmp_path,
+            prompt="p",
+            model="gpt-5.6-sol",
+            priced_spec="codex:gpt-5.6-sol",
+            max_turns=5,
+            collector=collector,
+            network=network,
+        )
+        argv = _codex_argv(collector)
+        return [argv[i + 1] for i, arg in enumerate(argv) if arg == "--config"]
+
+    offline = settings(network=False)
+    assert 'web_search="disabled"' in offline
+    assert all(setting in offline for setting in _CODEX_NO_WEB_CONFIG)
+    assert "features.apps=false" in offline
+    online = settings(network=True)
+    assert not any(setting in online for setting in _CODEX_NO_WEB_CONFIG)
+
+
+def test_codex_container_run_removes_staged_credentials(
+    tmp_path: Path, fake_codex: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    codex_home = tmp_path / "codex-home"
+    codex_home.mkdir()
+    (codex_home / "auth.json").write_text('{"token": "t"}')
+    monkeypatch.setenv("CODEX_HOME", str(codex_home))
+    # Run the fake CLI directly instead of under `docker run`.
+    monkeypatch.setattr(
+        "harness.agent.cli_agents._agent_container_argv", lambda *args, **kwargs: []
+    )
+    monkeypatch.setattr("harness.agent.cli_agents._kill_agent_container", lambda name: None)
+    run_dir = tmp_path / "run"
+    run_dir.mkdir()
+    workspace = tmp_path / "ws"
+    workspace.mkdir()
+    collector = _Collector()
+    outcome = run_codex_task(
+        workspace=workspace,
+        prompt="p",
+        model="gpt-5.6-sol",
+        priced_spec="codex:gpt-5.6-sol",
+        max_turns=5,
+        collector=collector,
+        stream_log_path=run_dir / "cli-agent-stream.jsonl",
+        agent_container=AgentContainerSpec(image="vulcanbench/agent-codex:test"),
+    )
+    assert outcome.finished
+    assert (run_dir / "cli-agent-stream.jsonl").is_file()
+    assert not (run_dir / "codex-auth").exists()
+    # The host credentials are untouched.
+    assert (codex_home / "auth.json").read_text() == '{"token": "t"}'
+
+
+def test_anthropic_raw_usage_keeps_unweighted_counts() -> None:
+    raw = _anthropic_raw_usage(
+        [
+            {
+                "input_tokens": 10,
+                "cache_read_input_tokens": 1000,
+                "cache_creation_input_tokens": 200,
+                "output_tokens": 50,
+            },
+            {"input_tokens": 5, "output_tokens": 7},
+        ]
+    )
+    assert raw == {"input_uncached": 15, "cache_read": 1000, "cache_write": 200, "output": 57}
 
 
 # ---------------------------------------------------------------------------

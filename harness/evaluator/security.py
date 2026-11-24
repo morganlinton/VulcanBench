@@ -36,6 +36,7 @@ from typing import Any
 from harness.evaluator import cfamily, diffscope
 from harness.evaluator.langs import MetricResult, group_by_language
 from harness.evaluator.quality import run_eslint
+from harness.tool_paths import resolve_tool
 
 _SEVERITY_PENALTY = {"high": 0.4, "medium": 0.15, "low": 0.05}
 
@@ -98,7 +99,7 @@ def _budget_exhausted(remaining_s: RemainingSeconds | None) -> bool:
 def _python(
     workspace: Path, files: list[str], remaining_s: RemainingSeconds | None
 ) -> MetricResult:
-    if shutil.which("bandit") is None:
+    if resolve_tool("bandit") is None:
         return MetricResult(score=None, details={"tool": "bandit", "reason": "bandit not on PATH"})
     abs_files = [str((workspace / f).resolve()) for f in files if (workspace / f).exists()]
     if not abs_files:
@@ -108,7 +109,7 @@ def _python(
         return MetricResult(score=None, details={"tool": "bandit", "reason": "run budget exceeded"})
     try:
         proc = subprocess.run(
-            ["bandit", "-f", "json", "-q", *abs_files],
+            [resolve_tool("bandit") or "bandit", "-f", "json", "-q", *abs_files],
             cwd=workspace,
             capture_output=True,
             text=True,

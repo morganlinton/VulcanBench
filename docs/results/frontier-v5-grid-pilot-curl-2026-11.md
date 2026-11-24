@@ -114,8 +114,9 @@ reproduced. No model was called.
 
 The environment's builder then repaired it as version 0.2.0 and checked
 every held-out test's assertions against its entry. That work was pushed
-before all of its admission checks had been rerun, so the numbers below are
-provisional.
+before all of its admission checks had been rerun, so the numbers below were
+provisional when written. The remaining checks were completed later the same
+day (next section).
 
 - **A leak in the version the two runs used.** The agent's tree in 0.1.0
   still held two data files containing the exact expected output of two
@@ -134,6 +135,52 @@ provisional.
   fails for both, because the trees were written before its entry stated
   the rule; that is where the trace's reading of 25 came from. A regrade is
   information, not a score.
+
+## A third model on the repaired environment (added the evening of November 22)
+
+Version 0.2.0 then finished admission on a second machine: the four verifier
+probes score 0, and Harbor's oracle and no-op runs give 27 of 27 and 0 of 27
+with the freeze hook. One more model then ran it once, with the same
+launcher settings as the first two: GPT-6 Astra at max effort with a 15
+minute budget.
+
+| Run | Model | Budget (min) | Items done | Agent minutes | Stopped at budget | Existing tests broken | Tool calls | Input tokens | Output tokens | Cost (USD) |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| 12 | GPT-6 Astra, max | 15 | 25 of 27 | 14.7 | no | 0 | 69 | 5.44M | 33.8k | 8.54 |
+
+25 of 27 is 0.926 (±0.050 binomial stderr). Input tokens include 5.28M of
+cached input. Cost is the API list-price equivalent Codex reports (the run
+used a ChatGPT subscription). This brings the pilot to twelve runs and
+$20.43.
+
+- **GPT-6 Astra ended its own session** 17 seconds before the budget,
+  reporting every item done. It broke none of the 1,798 existing tests.
+- **Its two misses are not the first two models' misses.** It finished the
+  two items both of them still fail in the regrade, and failed two items
+  (call them E and F) that both of them finished. Each failed one of its two
+  held-out tests.
+- **Both misses were traced the same way as before,** by rebuilding the
+  collected tree in the verifier image, rerunning the two tests and reading
+  each against its entry, the reference fix and the model's change:
+
+| Item | What the model did | Why the test fails | Verdict |
+| --- | --- | --- | --- |
+| E | Made the change the entry describes, and removed an older workaround that the change makes redundant. | The test compares generated text exactly and still expects the workaround's two lines. The model's output behaves the same without them. The entry's last sentence can be read as saying the workaround is no longer needed. | Environment defect |
+| F | Fixed both problems the entry describes; both of the test's assertions about them hold. | A third assertion, on the content of a second output file, is not stated in the entry, and the unfixed code does not satisfy it either. | Environment defect, with a caveat: a careful engineer might have asked about that file |
+
+- **Corrected reading: 27 of 27.** As before this is one reader's judgment
+  and not a rescore; the scored result stays 25 of 27.
+- **The repair's own assertion check missed both.** One test's third
+  assertion was not in its table, and one entry sentence can be read two
+  ways. Both were found only because a model followed the entry to the
+  letter.
+- **Three models now sit at the ceiling on this cell:** 25 scored for GPT-6
+  Astra, and 24 each for GPT-6.2 Sol and GPT-6.1 Terra in the regrade. A
+  worklist of small, fully described fixes does not separate them in a
+  large repo any more than in a small one.
+- **A Claude Fable 5.2 run was approved with this one and did not start.**
+  The launcher's usage check on the Claude subscription was refused (usage
+  credits required), so no session ran and nothing is scored for it.
 
 ## Run conditions
 
@@ -163,6 +210,15 @@ provisional.
   tamper scans. Both ended with Harbor's budget stop (`AgentTimeoutError`
   at 900 seconds), which is the designed stop and is graded.
 
+- Run 12 (GPT-6 Astra): tag
+  `bench/2026-11-22-frontier-v5-grid-pilot-curl-wider` (`0e9b30fb`), a
+  different machine from runs 10 and 11 (Apple M1 Max, Docker with 10 CPUs
+  and 7.75 GiB), Harbor 0.24.0, Codex CLI 0.159.0 (`gpt-6-astra`),
+  `model_reasoning_effort=max`, the same launcher settings, environment
+  version 0.2.0 (task checksum `92e5f419`). Audit: the stated model and
+  effort, 69 tool calls, all shell commands, no web or app call, a clean
+  tamper scan, no Harbor exception.
+
 ## Disclosures
 
 - **One run per model at one budget.** A tie between two single runs says
@@ -178,6 +234,10 @@ provisional.
 - **Expected output of two held-out tests was visible to the agents** in
   the version both runs used, and one model's log refers to it (see "After
   the repair"). One item in each score is affected.
+- **Run 12 used a different environment version and machine** from runs 10
+  and 11. Its 25 is comparable with their regrade (24 each), not with their
+  scored 22, and the regrade is not a score. The importer's price table has
+  no entry for GPT-6 Astra, so run 12's cost is the harness's own figure.
 - **Background load.** When run 10 started, a macOS background process
   unrelated to the benchmark was using about one of the machine's 12 cores.
   Each environment is allotted 4.
